@@ -1,4 +1,7 @@
-#  "Liquity V2 protocol which Nerite uses"
+# Nerite Protocol
+
+## The Basics
+Nerite is a Collateralized-Debt Position (CDP) protocol that issues the USDN stablecoin on Arbitrum. It uses the Liquity V2 system with several key additions. USDN is yield bearing and always over collateralized. 
 
 ## Table of Contents
 
