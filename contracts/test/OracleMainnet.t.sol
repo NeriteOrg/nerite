@@ -23,7 +23,7 @@ import "src/Interfaces/IRETHToken.sol";
 import "src/Interfaces/IWSTETH.sol";
 
 import "forge-std/Test.sol";
-import "lib/forge-std/src/console2.sol";
+import "forge-std/console2.sol";
 
 contract OraclesMainnet is TestAccounts {
 
