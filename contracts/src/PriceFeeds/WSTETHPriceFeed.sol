@@ -14,7 +14,7 @@ interface IWSTETH_Provider{
 
 contract WSTETHPriceFeed is CompositePriceFeed, IWSTETHPriceFeed {
     Oracle public stEthUsdOracle;
-    IWSTETH_Provider public provider = IWSTETH_Provider(0xB1552C5e96B312d0Bf8b554186F846C40614a540);
+    address public wStETHStEthOracle = 0xB1552C5e96B312d0Bf8b554186F846C40614a540;
 
 
     uint256 public constant STETH_USD_DEVIATION_THRESHOLD = 1e16; // 1%
@@ -40,7 +40,7 @@ contract WSTETHPriceFeed is CompositePriceFeed, IWSTETHPriceFeed {
     function _fetchPricePrimary(bool _isRedemption) internal override returns (uint256, bool) {
         assert(priceSource == PriceSource.primary);
         (uint256 stEthUsdPrice, bool stEthUsdOracleDown) = _getOracleAnswer(stEthUsdOracle);
-        (uint256 stEthPerWstEth, bool exchangeRateIsDown) = _getCanonicalRate();
+        (uint256 stEthPerWstEth, bool exchangeRateIsDown) = _getOracleAnswer(wStETHStEthOracle);
         (uint256 ethUsdPrice, bool ethUsdOracleDown) = _getOracleAnswer(ethUsdOracle);
 
         // - If exchange rate or ETH-USD is down, shut down and switch to last good price. Reasoning:
@@ -74,23 +74,4 @@ contract WSTETHPriceFeed is CompositePriceFeed, IWSTETHPriceFeed {
         return (wstEthUsdPrice, false);
     }
 
-    function _getCanonicalRate() internal view override returns (uint256, bool) {
-        uint256 gasBefore = gasleft();
-
-        try provider.getRate() returns (uint256 stEthPerWstEth) {
-            // If rate is 0, return true
-            if (stEthPerWstEth == 0) return (0, true);
-
-            return (stEthPerWstEth, false);
-        } catch {
-            // Require that enough gas was provided to prevent an OOG revert in the external call
-            // causing a shutdown. Instead, just revert. Slightly conservative, as it includes gas used
-            // in the check itself.
-            if (gasleft() <= gasBefore / 64) revert InsufficientGasForExternalCall();
-
-
-            // If call to exchange rate reverted for another reason, return true
-            return (0, true);
-        }
-    }
 }
