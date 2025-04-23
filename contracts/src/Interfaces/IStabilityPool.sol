@@ -102,7 +102,6 @@ interface IStabilityPool is ILiquityBase, IBoldRewardsReceiver {
 
     function scaleToB(uint256 _scale) external view returns (uint256);
 
-
     function P() external view returns (uint256);
     function currentScale() external view returns (uint256);
     function P_PRECISION() external view returns (uint256);

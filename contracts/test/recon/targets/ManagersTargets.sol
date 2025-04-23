@@ -8,16 +8,12 @@ import {vm} from "@chimera/Hevm.sol";
 
 import {MockERC20} from "../mocks/MockERC20.sol";
 
-
 // Target functions that are effectively inherited from the Actor and AssetManagers
 // Once properly standardized, managers will expose these by default
 // Keeping them out makes your project more custom
-abstract contract ManagersTargets is
-    BaseTargetFunctions,
-    Properties
-{
+abstract contract ManagersTargets is BaseTargetFunctions, Properties {
     // == ACTOR HANDLERS == //
-    
+
     /// @dev Start acting as another actor
     function switchActor(uint256 entropy) public returns (address) {
         _switchActor(entropy);
@@ -25,14 +21,12 @@ abstract contract ManagersTargets is
         return _getActor();
     }
 
-
     // /// @dev Starts using a new asset // NOTE: Unused for now
     function switch_asset(uint256 entropy) public returns (address) {
         _switchAsset(entropy);
 
         return _getAsset();
     }
-
 
     /// === GHOST UPDATING HANDLERS ===///
     /// We `updateGhosts` cause you never know (e.g. donations)

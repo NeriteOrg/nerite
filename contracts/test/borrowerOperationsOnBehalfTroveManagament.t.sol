@@ -109,8 +109,8 @@ contract BorrowerOperationsOnBehalfTroveManagamentTest is DevTestSetup {
 
         // Close trove (B opens first, so it’s not the last one)
         openTroveNoHints100pct(B, 100 ether, 10000e18, 1e17);
-        
-        //dev note: this does the same as using deal, 
+
+        //dev note: this does the same as using deal,
         //but because of SF memory usage we cant use deal() with BoldToken.
         //so pretend to be the BO, and mint new tokens directly.
         //deal(address(boldToken), A, troveManager.getTroveEntireDebt(ATroveId));
@@ -120,7 +120,6 @@ contract BorrowerOperationsOnBehalfTroveManagamentTest is DevTestSetup {
         boldToken.mint(A, troveManager.getTroveEntireDebt(ATroveId));
         vm.stopPrank();
 
-        
         closeTrove(A, ATroveId);
 
         // Try to reopen trove
@@ -503,7 +502,7 @@ contract BorrowerOperationsOnBehalfTroveManagamentTest is DevTestSetup {
         vm.startPrank(address(borrowerOperations));
         boldToken.mint(B, 100e18);
         vm.stopPrank();
-        
+
         vm.startPrank(B);
         uint256 BInitialBoldBalance = boldToken.balanceOf(B);
 
@@ -518,7 +517,7 @@ contract BorrowerOperationsOnBehalfTroveManagamentTest is DevTestSetup {
         boldToken.mint(C, 100e18);
         vm.stopPrank();
 
-        vm.startPrank(C);  
+        vm.startPrank(C);
         uint256 CInitialBoldBalance = boldToken.balanceOf(C);
 
         vm.expectRevert(AddRemoveManagers.NotOwnerNorAddManager.selector);

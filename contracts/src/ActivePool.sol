@@ -368,5 +368,4 @@ contract ActivePool is IActivePool {
     function delegateTokens() external {
         ERC20Votes(address(collToken)).delegate(delegateRepresentative);
     }
-
 }

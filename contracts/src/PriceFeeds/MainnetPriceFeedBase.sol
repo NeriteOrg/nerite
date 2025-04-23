@@ -105,7 +105,6 @@ abstract contract MainnetPriceFeedBase is IMainnetPriceFeed, Ownable {
             // in the check itself.
             if (gasleft() <= gasBefore / 64) revert InsufficientGasForExternalCall();
 
-
             // If call to Chainlink aggregator reverts, return a zero response with success = false
             return chainlinkResponse;
         }

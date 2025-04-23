@@ -35,8 +35,7 @@ contract TroveNFT is ERC721, ITroveNFT {
     }
 
     function tokenURI(uint256 _tokenId) public view override(ERC721, IERC721Metadata) returns (string memory) {
-        
-        //governor can update the URI externally at any time 
+        //governor can update the URI externally at any time
         //without effecting the NFT storage or other parts of the protocol.
         if (externalNFTUriAddress != address(0)) {
             return IExternalNFTUri(externalNFTUriAddress).tokenURI(_tokenId);

@@ -1,4 +1,3 @@
-
 // SPDX-License-Identifier: GPL-2.0
 pragma solidity ^0.8.0;
 
@@ -8,6 +7,4 @@ import "forge-std/console2.sol";
 
 import {Properties} from "../Properties.sol";
 
-abstract contract SampleTargets is BaseTargetFunctions, Properties  {
-
-}
+abstract contract SampleTargets is BaseTargetFunctions, Properties {}

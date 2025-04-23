@@ -1,4 +1,3 @@
-
 // SPDX-License-Identifier: GPL-2.0
 pragma solidity ^0.8.0;
 
@@ -8,8 +7,7 @@ import "forge-std/console2.sol";
 
 import {Properties} from "../Properties.sol";
 
-abstract contract CollTokenTargets is BaseTargetFunctions, Properties  {
-
+abstract contract CollTokenTargets is BaseTargetFunctions, Properties {
     function collToken_approve(address spender, uint256 amount) public updateGhosts asActor {
         collToken.approve(spender, amount);
     }

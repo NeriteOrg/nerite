@@ -1,4 +1,3 @@
-
 // SPDX-License-Identifier: GPL-2.0
 pragma solidity ^0.8.0;
 
@@ -8,12 +7,10 @@ import "forge-std/console2.sol";
 
 import {Properties} from "../Properties.sol";
 
-abstract contract TroveManagerTargets is BaseTargetFunctions, Properties  {
-
+abstract contract TroveManagerTargets is BaseTargetFunctions, Properties {
     function troveManager_batchLiquidateTroves(uint256[] memory _troveArray) public updateGhosts asActor {
         troveManager.batchLiquidateTroves(_troveArray);
     }
-
 
     function troveManager_liquidate(uint256 _troveId) public updateGhosts asActor {
         troveManager.liquidate(_troveId);
@@ -27,18 +24,20 @@ abstract contract TroveManagerTargets is BaseTargetFunctions, Properties  {
     function troveManager_liquidate_with_oracle_clamped() public {
         uint256 prevPrice = priceFeed.getPrice();
         priceFeed.setPrice(1); // Set to insanely low price
-        
+
         troveManager_liquidate(clampedTroveId); // Liquidate
 
         priceFeed.setPrice(prevPrice); //Bring back prev price
     }
 
-
-    function troveManager_urgentRedemption(uint256 _boldAmount, uint256[] memory _troveIds, uint256 _minCollateral) public updateGhosts asActor {
+    function troveManager_urgentRedemption(uint256 _boldAmount, uint256[] memory _troveIds, uint256 _minCollateral)
+        public
+        updateGhosts
+        asActor
+    {
         troveManager.urgentRedemption(_boldAmount, _troveIds, _minCollateral);
     }
 
-    
     function troveManager_urgentRedemption_clamped(uint256 _boldAmount) public {
         uint256[] memory ids = new uint256[](1);
         ids[0] = clampedTroveId;
@@ -46,7 +45,6 @@ abstract contract TroveManagerTargets is BaseTargetFunctions, Properties  {
         _boldAmount = _boldAmount % troveManager.getTroveDebt(clampedTroveId) + 1;
         troveManager_urgentRedemption(_boldAmount, ids, 0);
     }
-    
 
     // function troveManager_callInternalRemoveTroveId(uint256 _troveId) public updateGhosts asActor {
     //     troveManager.callInternalRemoveTroveId(_troveId);
@@ -55,7 +53,6 @@ abstract contract TroveManagerTargets is BaseTargetFunctions, Properties  {
     // function troveManager_getUnbackedPortionPriceAndRedeemability() public updateGhosts asActor {
     //     troveManager.getUnbackedPortionPriceAndRedeemability();
     // }
-
 
     // function troveManager_onAdjustTrove(uint256 _troveId, uint256 _newColl, uint256 _newDebt, TroveChange memory _troveChange) public updateGhosts asActor {
     //     troveManager.onAdjustTrove(_troveId, _newColl, _newDebt, _troveChange);
@@ -116,6 +113,4 @@ abstract contract TroveManagerTargets is BaseTargetFunctions, Properties  {
     // function troveManager_shutdown() public updateGhosts asActor {
     //     troveManager.shutdown();
     // }
-
-
 }

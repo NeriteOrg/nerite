@@ -44,7 +44,5 @@ contract XVSPriceFeed is TokenPriceFeedBase {
 
         lastGoodPrice = tokenUsdPrice;
         return (tokenUsdPrice, false);
-    }   
-}   
-
-
+    }
+}

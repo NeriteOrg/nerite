@@ -5,9 +5,11 @@ import "./BaseTest.sol";
 import {TestDeployer} from "./Deployment.t.sol";
 import "forge-std/console.sol";
 
-import { ISuperToken } from "@superfluid-finance/ethereum-contracts/contracts/interfaces/superfluid/ISuperfluid.sol";
-import { SuperfluidFrameworkDeployer } from "@superfluid-finance/ethereum-contracts/contracts/utils/SuperfluidFrameworkDeployer.t.sol";
-import { ERC1820RegistryCompiled } from "@superfluid-finance/ethereum-contracts/contracts/libs/ERC1820RegistryCompiled.sol";
+import {ISuperToken} from "@superfluid-finance/ethereum-contracts/contracts/interfaces/superfluid/ISuperfluid.sol";
+import {SuperfluidFrameworkDeployer} from
+    "@superfluid-finance/ethereum-contracts/contracts/utils/SuperfluidFrameworkDeployer.t.sol";
+import {ERC1820RegistryCompiled} from
+    "@superfluid-finance/ethereum-contracts/contracts/libs/ERC1820RegistryCompiled.sol";
 
 contract DevTestSetup is BaseTest {
     function giveAndApproveColl(address _account, uint256 _amount) public {
@@ -35,17 +37,15 @@ contract DevTestSetup is BaseTest {
         assertEq(_token.allowance(_account, _borrowerOperationsAddress), _amount);
     }
 
-    
-    address constant internal _OWNER = address(0x1);
-	//BoldToken internal _superBoldToken;
-	SuperfluidFrameworkDeployer.Framework internal _sf;
-    
+    address internal constant _OWNER = address(0x1);
+    //BoldToken internal _superBoldToken;
+    SuperfluidFrameworkDeployer.Framework internal _sf;
 
     function setupSuperToken() public {
         vm.etch(ERC1820RegistryCompiled.at, ERC1820RegistryCompiled.bin);
-		SuperfluidFrameworkDeployer sfDeployer = new SuperfluidFrameworkDeployer();
-		sfDeployer.deployTestFramework();
-		_sf = sfDeployer.getFramework();
+        SuperfluidFrameworkDeployer sfDeployer = new SuperfluidFrameworkDeployer();
+        sfDeployer.deployTestFramework();
+        _sf = sfDeployer.getFramework();
         console.log("Superfluid framework deployed in DevTestSetup with setupSuperToken");
     }
 
@@ -150,8 +150,6 @@ contract DevTestSetup is BaseTest {
         uint256 troveDebtRequest_C = 2450e18 * _magnitude;
         uint256 troveDebtRequest_D = 2450e18 * _magnitude;
         uint256 interestRate = 5e16; // 5%
-
-        
 
         ABCDEF memory troveIDs;
 

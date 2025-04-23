@@ -18,6 +18,7 @@ import "./TestContracts/Deployment.t.sol";
 import "src/Dependencies/AggregatorV3Interface.sol";
 import "src/Interfaces/IRETHPriceFeed.sol";
 import "src/Interfaces/IWSTETHPriceFeed.sol";
+import "src/PriceFeeds/WSTETHPriceFeed.sol";
 
 import "src/Interfaces/IRETHToken.sol";
 import "src/Interfaces/IWSTETH.sol";
@@ -26,7 +27,6 @@ import "forge-std/Test.sol";
 import "forge-std/console2.sol";
 
 contract OraclesMainnet is TestAccounts {
-
     uint256 constant MAX_INT = 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff;
     AggregatorV3Interface ethOracle;
     AggregatorV3Interface stethOracle;
@@ -38,7 +38,7 @@ contract OraclesMainnet is TestAccounts {
 
     IMainnetPriceFeed wethPriceFeed;
     IRETHPriceFeed rethPriceFeed;
-    IWSTETHPriceFeed wstethPriceFeed;
+    WSTETHPriceFeed wstethPriceFeed;
 
     IRETHToken rethToken;
     IWSTETH wstETH;
@@ -81,7 +81,7 @@ contract OraclesMainnet is TestAccounts {
 
         vars.numCollaterals = 3;
         TestDeployer.TroveManagerParams memory tmParams =
-            TestDeployer.TroveManagerParams(150e16, 110e16, 10e16, 110e16, 5e16, 10e16, MAX_INT/2);
+            TestDeployer.TroveManagerParams(150e16, 110e16, 10e16, 110e16, 5e16, 10e16, MAX_INT / 2);
         TestDeployer.TroveManagerParams[] memory troveManagerParamsArray =
             new TestDeployer.TroveManagerParams[](vars.numCollaterals);
         for (uint256 i = 0; i < troveManagerParamsArray.length; i++) {
@@ -132,7 +132,7 @@ contract OraclesMainnet is TestAccounts {
 
         wethPriceFeed = IMainnetPriceFeed(address(contractsArray[0].priceFeed));
         rethPriceFeed = IRETHPriceFeed(address(contractsArray[1].priceFeed));
-        wstethPriceFeed = IWSTETHPriceFeed(address(contractsArray[2].priceFeed));
+        wstethPriceFeed = WSTETHPriceFeed(address(contractsArray[2].priceFeed));
 
         // log some current blockchain state
         // console2.log(block.timestamp, "block.timestamp");

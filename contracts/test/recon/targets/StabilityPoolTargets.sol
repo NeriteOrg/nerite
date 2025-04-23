@@ -1,4 +1,3 @@
-
 // SPDX-License-Identifier: GPL-2.0
 pragma solidity ^0.8.0;
 
@@ -8,12 +7,10 @@ import "forge-std/console2.sol";
 
 import {Properties} from "../Properties.sol";
 
-abstract contract StabilityPoolTargets is BaseTargetFunctions, Properties  {
-
+abstract contract StabilityPoolTargets is BaseTargetFunctions, Properties {
     function stabilityPool_claimAllCollGains() public updateGhosts asActor {
         stabilityPool.claimAllCollGains();
     }
-
 
     function stabilityPool_provideToSP(uint256 _topUp, bool _doClaim) public updateGhosts asActor {
         stabilityPool.provideToSP(_topUp, _doClaim);
@@ -33,8 +30,6 @@ abstract contract StabilityPoolTargets is BaseTargetFunctions, Properties  {
         stabilityPool_withdrawFromSP(_amount, _doClaim);
     }
 
-
-
     function stabilityPool_offset(uint256 _debtToOffset, uint256 _collToAdd) public updateGhosts asActor {
         stabilityPool.offset(_debtToOffset, _collToAdd);
     }
@@ -42,5 +37,4 @@ abstract contract StabilityPoolTargets is BaseTargetFunctions, Properties  {
     function stabilityPool_triggerBoldRewards(uint256 _boldYield) public updateGhosts asActor {
         stabilityPool.triggerBoldRewards(_boldYield);
     }
-
 }

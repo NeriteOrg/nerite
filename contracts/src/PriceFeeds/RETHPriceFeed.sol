@@ -92,7 +92,6 @@ contract RETHPriceFeed is CompositePriceFeed, IRETHPriceFeed {
             // in the check itself.
             if (gasleft() <= gasBefore / 64) revert InsufficientGasForExternalCall();
 
-
             // If call to exchange rate reverts, return true
             return (0, true);
         }

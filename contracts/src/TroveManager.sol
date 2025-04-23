@@ -419,7 +419,7 @@ contract TroveManager is LiquityBase, ITroveManager, ITroveEvents {
         LiquidationValues memory totals;
 
         (uint256 price,) = priceFeed.fetchPrice();
-        
+
         // - If the SP has total deposits >= 1e18, we leave 1e18 in it untouched.
         // - If it has 0 < x < 1e18 total deposits, we leave x in it.
         uint256 totalBoldDeposits = stabilityPoolCached.getTotalBoldDeposits();

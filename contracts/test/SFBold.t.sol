@@ -1,15 +1,17 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.24;
-import { BoldToken, IBoldToken } from "../src/BoldToken.sol";
+
+import {BoldToken, IBoldToken} from "../src/BoldToken.sol";
 import {console} from "forge-std/console.sol";
 
 import {Test} from "forge-std/Test.sol";
-import {ISuperTokenFactory} from "@superfluid-finance/ethereum-contracts/contracts/interfaces/superfluid/ISuperfluid.sol";
+import {ISuperTokenFactory} from
+    "@superfluid-finance/ethereum-contracts/contracts/interfaces/superfluid/ISuperfluid.sol";
 import {SuperfluidFrameworkDeployer} from
     "@superfluid-finance/ethereum-contracts/contracts/utils/SuperfluidFrameworkDeployer.t.sol";
 import {ERC1820RegistryCompiled} from
     "@superfluid-finance/ethereum-contracts/contracts/libs/ERC1820RegistryCompiled.sol";
-import { SuperTokenV1Library } from "@superfluid-finance/ethereum-contracts/contracts/apps/SuperTokenV1Library.sol";
+import {SuperTokenV1Library} from "@superfluid-finance/ethereum-contracts/contracts/apps/SuperTokenV1Library.sol";
 
 using SuperTokenV1Library for IBoldToken;
 
@@ -30,7 +32,10 @@ contract SFBold is Test {
         _sf = sfDeployer.getFramework();
 
         BoldToken superTokenPermitProxy = new BoldToken(_OWNER, _sf.superTokenFactory);
-        console.log("Deploying super token permit proxy in Setup for SF Bold. superTokenPermitProxy", address(superTokenPermitProxy));
+        console.log(
+            "Deploying super token permit proxy in Setup for SF Bold. superTokenPermitProxy",
+            address(superTokenPermitProxy)
+        );
         superTokenPermitProxy.initialize(_sf.superTokenFactory);
         _boldToken = IBoldToken(address(superTokenPermitProxy));
 
@@ -144,8 +149,8 @@ contract SFBold is Test {
 
 /// Validation of the storage layout
 contract SFBoldStorageLayoutTest is BoldToken {
-
     constructor(address _owner, ISuperTokenFactory _sf) BoldToken(_owner, _sf) {}
+
     error STORAGE_LOCATION_CHANGED(string _name);
 
     function validateStorageLayout() public pure {
@@ -155,19 +160,34 @@ contract SFBoldStorageLayoutTest is BoldToken {
         // storage slots 0-31 are reserved for SuperToken logic via CustomSuperTokenBase
         // storage slot 32: Ownable | address _owner
 
-        assembly { slot := collateralRegistryAddress.slot offset := collateralRegistryAddress.offset }
+        assembly {
+            slot := collateralRegistryAddress.slot
+            offset := collateralRegistryAddress.offset
+        }
         if (slot != 33 || offset != 0) revert STORAGE_LOCATION_CHANGED("collateralRegistryAddress");
 
-        assembly { slot := troveManagerAddresses.slot offset := troveManagerAddresses.offset }
+        assembly {
+            slot := troveManagerAddresses.slot
+            offset := troveManagerAddresses.offset
+        }
         if (slot != 34 || offset != 0) revert STORAGE_LOCATION_CHANGED("troveManagerAddresses");
 
-        assembly { slot := stabilityPoolAddresses.slot offset := stabilityPoolAddresses.offset }
+        assembly {
+            slot := stabilityPoolAddresses.slot
+            offset := stabilityPoolAddresses.offset
+        }
         if (slot != 35 || offset != 0) revert STORAGE_LOCATION_CHANGED("stabilityPoolAddresses");
 
-        assembly { slot := borrowerOperationsAddresses.slot offset := borrowerOperationsAddresses.offset }
+        assembly {
+            slot := borrowerOperationsAddresses.slot
+            offset := borrowerOperationsAddresses.offset
+        }
         if (slot != 36 || offset != 0) revert STORAGE_LOCATION_CHANGED("borrowerOperationsAddresses");
 
-        assembly { slot := activePoolAddresses.slot offset := activePoolAddresses.offset }
+        assembly {
+            slot := activePoolAddresses.slot
+            offset := activePoolAddresses.offset
+        }
         if (slot != 37 || offset != 0) revert STORAGE_LOCATION_CHANGED("activePoolAddresses");
     }
 }

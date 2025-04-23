@@ -2,11 +2,9 @@
 
 pragma solidity 0.8.24;
 
-
 import "./CompositePriceFeed.sol";
 import "../Interfaces/ITreeETHToken.sol";
 import "../Interfaces/ITreeETHPriceFeed.sol";
-
 
 contract TreeETHPriceFeed is CompositePriceFeed, ITreeETHPriceFeed {
     constructor(
@@ -64,7 +62,9 @@ contract TreeETHPriceFeed is CompositePriceFeed, ITreeETHPriceFeed {
         // If it's a redemption and canonical is within 2% of market, use the max to mitigate unwanted redemption oracle arb
         if (
             _isRedemption
-                && _withinDeviationThreshold(treeEthUsdMarketPrice, treeEthUsdCanonicalPrice, TREEETH_ETH_DEVIATION_THRESHOLD)
+                && _withinDeviationThreshold(
+                    treeEthUsdMarketPrice, treeEthUsdCanonicalPrice, TREEETH_ETH_DEVIATION_THRESHOLD
+                )
         ) {
             treeEthUsdPrice = LiquityMath._max(treeEthUsdMarketPrice, treeEthUsdCanonicalPrice);
         } else {
@@ -96,6 +96,4 @@ contract TreeETHPriceFeed is CompositePriceFeed, ITreeETHPriceFeed {
             return (0, true);
         }
     }
-}   
-
-
+}

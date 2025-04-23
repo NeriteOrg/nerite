@@ -1,5 +1,3 @@
-
-
 // SPDX-License-Identifier: GPL-2.0
 pragma solidity ^0.8.0;
 
@@ -12,7 +10,7 @@ abstract contract RevertHelper is Asserts {
         bool isEqual = _isRevertReasonEqual(returnData, reason);
         t(!isEqual, reason);
     }
-    
+
     function assertRevertReasonEqual(bytes memory returnData, string memory reason) internal {
         bool isEqual = _isRevertReasonEqual(returnData, reason);
         t(isEqual, reason);
@@ -23,12 +21,12 @@ abstract contract RevertHelper is Asserts {
         if (returnData.length == 4 + 32) {
             // Check that the data starts with the Panic signature
             bytes4 panicSignature = bytes4(keccak256(bytes("Panic(uint256)")));
-            for (uint i = 0; i < 4; i++) {
+            for (uint256 i = 0; i < 4; i++) {
                 if (returnData[i] != panicSignature[i]) return "Undefined signature";
             }
 
             uint256 panicCode;
-            for (uint i = 4; i < 36; i++) {
+            for (uint256 i = 4; i < 36; i++) {
                 panicCode = panicCode << 8;
                 panicCode |= uint8(returnData[i]);
             }
@@ -39,7 +37,7 @@ abstract contract RevertHelper is Asserts {
             }
             if (panicCode == 18) {
                 return "Panic(18)";
-            } 
+            }
 
             // Add other panic codes as needed or return a generic "Unknown panic"
             return "Undefined panic code";
@@ -60,10 +58,7 @@ abstract contract RevertHelper is Asserts {
         expectedSig = bytes4(keccak256(bytes(reason)));
     }
 
-    function _isRevertReasonEqual(
-        bytes memory returnData,
-        string memory reason
-    ) internal pure returns (bool) {
+    function _isRevertReasonEqual(bytes memory returnData, string memory reason) internal pure returns (bool) {
         bytes4 sig = bytes4(returnData);
         bytes4 expectedSig = _getStringAsSig(reason);
         return (sig == expectedSig);

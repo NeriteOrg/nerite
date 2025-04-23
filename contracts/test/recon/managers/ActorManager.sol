@@ -34,7 +34,7 @@ abstract contract ActorManager {
         _actors.add(address(this));
         _actor = address(this);
     }
-    
+
     modifier useActor() {
         vm.prank(_getActor());
         _;
@@ -42,14 +42,14 @@ abstract contract ActorManager {
 
     // use this function to get the current active actor
     function _getActor() internal view returns (address) {
-       return _actor;
+        return _actor;
     }
 
-    // returns an actor different from the currently set one 
+    // returns an actor different from the currently set one
     function _getDifferentActor() internal view returns (address differentActor) {
         address[] memory actors_ = _getActors();
-        for(uint256 i; i < actors_.length; i++) {
-            if(actors_[i] != _actor) {
+        for (uint256 i; i < actors_.length; i++) {
+            if (actors_[i] != _actor) {
                 differentActor = actors_[i];
             }
         }
@@ -68,7 +68,7 @@ abstract contract ActorManager {
     function _enableActor(address target) internal {
         _actor = target;
     }
-    
+
     // NOTE: disabling an actor set the default actor (address(this)) as the current actor
     function _disableActor() internal {
         _actor = address(this);
@@ -95,7 +95,7 @@ abstract contract ActorManager {
             revert DefaultActor();
         }
 
-        _actors.remove(target);  
+        _actors.remove(target);
     }
 
     // Note: expose this function _in `TargetFunctions` for actor switching

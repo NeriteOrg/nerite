@@ -1,4 +1,3 @@
-
 // SPDX-License-Identifier: GPL-2.0
 pragma solidity ^0.8.0;
 
@@ -16,7 +15,7 @@ import {PriceFeedTargets} from "./targets/PriceFeedTargets.sol";
 import {StabilityPoolTargets} from "./targets/StabilityPoolTargets.sol";
 import {TroveManagerTargets} from "./targets/TroveManagerTargets.sol";
 
-abstract contract TargetFunctions is 
+abstract contract TargetFunctions is
     ActivePoolTargets,
     BorrowerOperationsTargets,
     CollateralRegistryTargets,
@@ -26,14 +25,12 @@ abstract contract TargetFunctions is
     PriceFeedTargets,
     StabilityPoolTargets,
     TroveManagerTargets
-
- {
-
+{
     function canary_liquidation() public {
         t(!hasDoneLiquidation, "canary_liquidation");
     }
+
     function canary_redemption() public {
         t(!hasDoneRedemption, "canary_redemption");
     }
-
 }

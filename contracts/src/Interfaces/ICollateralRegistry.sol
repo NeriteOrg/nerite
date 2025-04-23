@@ -26,6 +26,5 @@ interface ICollateralRegistry {
 
     function updateDebtLimit(uint256 _indexTroveManager, uint256 _newDebtLimit) external;
     function updateGovernor(address _newGovernor) external;
-    function getDebtLimit(uint256 _indexTroveManager) external view returns (uint256); 
-    
+    function getDebtLimit(uint256 _indexTroveManager) external view returns (uint256);
 }

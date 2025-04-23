@@ -2,7 +2,6 @@
 
 pragma solidity 0.8.24;
 
-
 import "./TokenPriceFeedBase.sol";
 
 contract COMPPriceFeed is TokenPriceFeedBase {
@@ -46,7 +45,4 @@ contract COMPPriceFeed is TokenPriceFeedBase {
         lastGoodPrice = tokenUsdPrice;
         return (tokenUsdPrice, false);
     }
-    
-}   
-
-
+}

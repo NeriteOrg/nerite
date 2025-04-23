@@ -36,7 +36,7 @@ contract AddressesRegistry is Ownable, IAddressesRegistry {
     uint256 public immutable MCR;
 
     // Extra buffer of collateral ratio to join a batch or adjust a trove inside a batch (on top of MCR)
-     uint256 public immutable BCR;
+    uint256 public immutable BCR;
 
     // Debt limit for the system
     uint256 public debtLimit;

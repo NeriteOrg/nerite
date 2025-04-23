@@ -29,7 +29,11 @@ import {MultiTroveGetter} from "../../src/MultiTroveGetter.sol";
 
 import "openzeppelin-contracts/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 import {IBoldToken} from "../../src/Interfaces/IBoldToken.sol";
-import { ISuperToken, ISuperTokenFactory, IERC20 } from "@superfluid-finance/ethereum-contracts/contracts/interfaces/superfluid/ISuperfluid.sol";
+import {
+    ISuperToken,
+    ISuperTokenFactory,
+    IERC20
+} from "@superfluid-finance/ethereum-contracts/contracts/interfaces/superfluid/ISuperfluid.sol";
 import {IWETH} from "../../src/Interfaces/IWETH.sol";
 import {IAddressesRegistry} from "../../src/Interfaces/IAddressesRegistry.sol";
 import {ICollateralRegistry} from "../../src/Interfaces/ICollateralRegistry.sol";
@@ -52,16 +56,13 @@ import {ISortedTroves} from "../../src/Interfaces/ISortedTroves.sol";
 // Superfluid
 import {SuperfluidFrameworkDeployer} from
     "@superfluid-finance/ethereum-contracts/contracts/utils/SuperfluidFrameworkDeployer.t.sol";
-import { SuperTokenV1Library } from "@superfluid-finance/ethereum-contracts/contracts/apps/SuperTokenV1Library.sol";
-
+import {SuperTokenV1Library} from "@superfluid-finance/ethereum-contracts/contracts/apps/SuperTokenV1Library.sol";
 
 interface IInitializableBold {
     function initialize(ISuperTokenFactory factory) external;
 }
 
-contract InterestRouter {
-    
-}
+contract InterestRouter {}
 
 // TODO: Figure out ways to shutdown
 contract MultiTokenPriceFeedTestnet {
@@ -173,14 +174,11 @@ abstract contract Setup is BaseSetup, ActorManager, AssetManager {
         return clampedTroveId; // So it gets added to the dictionary
     }
 
-
-    
     // bold token
 
     // TODO: Chunk these out, no point in not
 
     bytes32 SALT = bytes32(uint256(0x123123));
-
 
     // Assets
     MockERC20 weth;
@@ -192,10 +190,10 @@ abstract contract Setup is BaseSetup, ActorManager, AssetManager {
     // Superfluid
     SuperfluidFrameworkDeployer.Framework _sf;
 
-    function _setupAddressRegistryAndTroveManager(
-        address coll,
-        TroveManagerParams memory params
-    ) internal returns (address, address) {
+    function _setupAddressRegistryAndTroveManager(address coll, TroveManagerParams memory params)
+        internal
+        returns (address, address)
+    {
         AddressesRegistry newAddressesRegistry = new AddressesRegistry(
             address(this),
             params.CCR,
@@ -206,9 +204,10 @@ abstract contract Setup is BaseSetup, ActorManager, AssetManager {
             params.LIQUIDATION_PENALTY_SP,
             params.LIQUIDATION_PENALTY_REDISTRIBUTION
         );
-        address troveManagerAddress =
-            getAddress(address(this), getBytecode(type(TroveManagerTester).creationCode, address(newAddressesRegistry)), SALT);
-        
+        address troveManagerAddress = getAddress(
+            address(this), getBytecode(type(TroveManagerTester).creationCode, address(newAddressesRegistry)), SALT
+        );
+
         return (address(newAddressesRegistry), troveManagerAddress);
     }
 
@@ -227,7 +226,7 @@ abstract contract Setup is BaseSetup, ActorManager, AssetManager {
         // Bold and interst router
         interestRouter = new InterestRouter();
         boldToken = boldToken = IBoldToken(address(new BoldToken{salt: SALT}(address(this), _sf.superTokenFactory)));
-        
+
         // NOTE: Unclear interface?
         console.log("Initializing bold token in Setup. Please work :pray:");
         IInitializableBold(address(boldToken)).initialize(ISuperTokenFactory(factory));
@@ -235,30 +234,29 @@ abstract contract Setup is BaseSetup, ActorManager, AssetManager {
         weth = MockERC20(_newAsset(18));
 
         TroveManagerParams memory _troveManagerParams = TroveManagerParams({
-            CCR: 150e16,                          // 150%
-            MCR: 110e16,                          // 110%
-            SCR: 130e16,                          // 130%
-            BCR: 120e16,                          // 120%
-            debtLimit: type(uint256).max, 
-            LIQUIDATION_PENALTY_SP: 1e17,         // 10%
-            LIQUIDATION_PENALTY_REDISTRIBUTION: 1e17  // 10%
+            CCR: 150e16, // 150%
+            MCR: 110e16, // 110%
+            SCR: 130e16, // 130%
+            BCR: 120e16, // 120%
+            debtLimit: type(uint256).max,
+            LIQUIDATION_PENALTY_SP: 1e17, // 10%
+            LIQUIDATION_PENALTY_REDISTRIBUTION: 1e17 // 10%
         });
 
-        (address newAddressesRegistryAddr, address troveManagerAddress) = _setupAddressRegistryAndTroveManager(
-            address(weth),
-            _troveManagerParams
-        );
+        (address newAddressesRegistryAddr, address troveManagerAddress) =
+            _setupAddressRegistryAndTroveManager(address(weth), _troveManagerParams);
 
         // Initialize arrays for collateral registry
         IERC20Metadata[] memory collaterals = new IERC20Metadata[](1);
         collaterals[0] = IERC20Metadata(address(weth));
-        
+
         ITroveManager[] memory troveManagers = new ITroveManager[](1);
         troveManagers[0] = ITroveManager(troveManagerAddress);
 
         /// MID
         // Deploy registry and register the TMs
-        collateralRegistry = new CollateralRegistry(IBoldToken(address(boldToken)), collaterals, troveManagers, governor);
+        collateralRegistry =
+            new CollateralRegistry(IBoldToken(address(boldToken)), collaterals, troveManagers, governor);
         hintHelpers = new HintHelpers(collateralRegistry);
         multiTroveGetter = new MultiTroveGetter(collateralRegistry);
 
@@ -269,20 +267,21 @@ abstract contract Setup is BaseSetup, ActorManager, AssetManager {
         // Then ad-hoc branch setup
         // Ad hoc branch setup
         // Deploy and add branch!
-        branches.push(_copiedDeploy(
-            IERC20Metadata(address(weth)),
-            IBoldToken(address(boldToken)),
-            IWETH(address(weth)),
-            troveManagerAddress,
-            AddressesRegistry(newAddressesRegistryAddr),
-            ICollateralRegistry(address(collateralRegistry)),
-            IHintHelpers(address(hintHelpers)),
-            IMultiTroveGetter(address(multiTroveGetter)),
-            _troveManagerParams
-        ));
+        branches.push(
+            _copiedDeploy(
+                IERC20Metadata(address(weth)),
+                IBoldToken(address(boldToken)),
+                IWETH(address(weth)),
+                troveManagerAddress,
+                AddressesRegistry(newAddressesRegistryAddr),
+                ICollateralRegistry(address(collateralRegistry)),
+                IHintHelpers(address(hintHelpers)),
+                IMultiTroveGetter(address(multiTroveGetter)),
+                _troveManagerParams
+            )
+        );
 
         _switchToActiveBranch(0);
-
 
         _onActorEnabled(address(this));
         _onActorEnabled(address(0x7333333337));
@@ -304,10 +303,7 @@ abstract contract Setup is BaseSetup, ActorManager, AssetManager {
         priceFeed = activeBranch.priceFeed;
         gasPool = activeBranch.gasPool;
         collToken = activeBranch.collToken;
-
-
     }
-
 
     // STRUCTS
     struct LiquityContractAddresses {
@@ -330,7 +326,7 @@ abstract contract Setup is BaseSetup, ActorManager, AssetManager {
         uint256 MCR;
         uint256 SCR;
         uint256 BCR;
-        uint256 debtLimit;      
+        uint256 debtLimit;
         uint256 LIQUIDATION_PENALTY_SP;
         uint256 LIQUIDATION_PENALTY_REDISTRIBUTION;
     }
@@ -449,20 +445,16 @@ abstract contract Setup is BaseSetup, ActorManager, AssetManager {
         );
     }
 
-
-    
     // TODO: NEED
     function switchBranch(uint256 index) public {
         // Switch to active branch
         activeBranch = branches[index];
     }
 
-
     // TODO: Programmatic Deployment of a Branch
     // Way to add more?
 
     // TODO: Replace with TroveManager2
-
 
     /// === ACTOR MANAGER HOOKS === ///
     // Given each actor a swap function that is called on swap
@@ -478,22 +470,18 @@ abstract contract Setup is BaseSetup, ActorManager, AssetManager {
         collToken.mint(actor, type(uint88).max);
     }
 
-
     /// === Actor Modifiers === ///
 
     // NOTE: LIMITATION You can use these modifier only for one call, so use them for BASIC TARGETS
-    modifier asAdmin {
+    modifier asAdmin() {
         vm.prank(address(this));
         _;
     }
 
-    modifier asActor {
+    modifier asActor() {
         vm.prank(_getActor());
         _;
     }
-
-
-    
 
     /// === Deplyoment crap === ///
     function getBytecode(bytes memory _creationCode, address _addressesRegistry) internal pure returns (bytes memory) {
@@ -510,5 +498,4 @@ abstract contract Setup is BaseSetup, ActorManager, AssetManager {
     function deployMetadata(bytes32 salt) internal returns (address) {
         return (address(0x123123));
     }
-
 }

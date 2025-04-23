@@ -42,7 +42,7 @@ contract BorrowerOperations is LiquityBase, AddRemoveManagers, IBorrowerOperatio
     uint256 public immutable MCR;
 
     // Extra buffer of collateral ratio to join a batch or adjust a trove inside a batch (on top of MCR)
-     uint256 public immutable BCR;
+    uint256 public immutable BCR;
 
     /*
     * Mapping from TroveId to individual delegate for interest rate setting.
@@ -334,7 +334,10 @@ contract BorrowerOperations is LiquityBase, AddRemoveManagers, IBorrowerOperatio
         _requireUserAcceptsUpfrontFee(_change.upfrontFee, _maxUpfrontFee);
 
         vars.entireDebt = _change.debtIncrease + _change.upfrontFee;
-        require(troveManager.getDebtLimit() >= troveManager.getEntireBranchDebt() + vars.entireDebt, "BorrowerOperations: Debt limit exceeded.");
+        require(
+            troveManager.getDebtLimit() >= troveManager.getEntireBranchDebt() + vars.entireDebt,
+            "BorrowerOperations: Debt limit exceeded."
+        );
         _requireAtLeastMinDebt(vars.entireDebt);
 
         vars.ICR = LiquityMath._computeCR(_collAmount, vars.entireDebt, vars.price);
@@ -344,7 +347,7 @@ contract BorrowerOperations is LiquityBase, AddRemoveManagers, IBorrowerOperatio
             _change.newWeightedRecordedDebt = vars.entireDebt * _annualInterestRate;
 
             // ICR is based on the requested Bold amount + upfront fee.
-             _requireICRisAboveMCR(vars.ICR);
+            _requireICRisAboveMCR(vars.ICR);
         } else {
             // old values have been set outside, before calling this function
             _change.newWeightedRecordedDebt = (_batchEntireDebt + vars.entireDebt) * _annualInterestRate;
@@ -535,8 +538,8 @@ contract BorrowerOperations is LiquityBase, AddRemoveManagers, IBorrowerOperatio
         troveChange.oldWeightedRecordedDebt = trove.weightedRecordedDebt;
 
         // Apply upfront fee on premature adjustments. It checks the resulting ICR
-         if (block.timestamp < trove.lastInterestRateAdjTime + INTEREST_RATE_ADJ_COOLDOWN) {
-             newDebt = _applyUpfrontFee(trove.entireColl, newDebt, troveChange, _maxUpfrontFee, false);
+        if (block.timestamp < trove.lastInterestRateAdjTime + INTEREST_RATE_ADJ_COOLDOWN) {
+            newDebt = _applyUpfrontFee(trove.entireColl, newDebt, troveChange, _maxUpfrontFee, false);
         }
 
         // Recalculate newWeightedRecordedDebt, now taking into account the upfront fee
@@ -1134,10 +1137,10 @@ contract BorrowerOperations is LiquityBase, AddRemoveManagers, IBorrowerOperatio
         uint256 newICR = LiquityMath._computeCR(_troveEntireColl, _troveEntireDebt, price);
         _requireICRisAboveMCR(newICR);
         if (_isTroveInBatch) {
-             _requireICRisAboveMCRPlusBCR(newICR);
-         } else {
-             _requireICRisAboveMCR(newICR);
-         }
+            _requireICRisAboveMCRPlusBCR(newICR);
+        } else {
+            _requireICRisAboveMCR(newICR);
+        }
 
         // Disallow a premature adjustment if it would result in TCR < CCR
         // (which includes the case when TCR is already below CCR before the adjustment).
@@ -1235,10 +1238,12 @@ contract BorrowerOperations is LiquityBase, AddRemoveManagers, IBorrowerOperatio
         IBoldToken _boldToken,
         IActivePool _activePool
     ) internal {
-
         if (_troveChange.debtIncrease > 0) {
             // Check if the debt limit is exceeded only when increasing debt.
-            require(troveManager.getDebtLimit() >= troveManager.getEntireBranchDebt() + _troveChange.debtIncrease, "BorrowerOperations: Debt limit exceeded.");
+            require(
+                troveManager.getDebtLimit() >= troveManager.getEntireBranchDebt() + _troveChange.debtIncrease,
+                "BorrowerOperations: Debt limit exceeded."
+            );
             _boldToken.mint(withdrawalReceiver, _troveChange.debtIncrease);
         } else if (_troveChange.debtDecrease > 0) {
             //debt can be repaid without checking the debt limit.
@@ -1401,10 +1406,10 @@ contract BorrowerOperations is LiquityBase, AddRemoveManagers, IBorrowerOperatio
     }
 
     function _requireICRisAboveMCRPlusBCR(uint256 _newICR) internal view {
-         if (_newICR < MCR + BCR) {
-             revert ICRBelowMCRPlusBCR();
-         }
-     }
+        if (_newICR < MCR + BCR) {
+            revert ICRBelowMCRPlusBCR();
+        }
+    }
 
     function _requireICRisAboveMCR(uint256 _newICR) internal view {
         if (_newICR < MCR) {

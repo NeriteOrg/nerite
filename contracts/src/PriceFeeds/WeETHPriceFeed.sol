@@ -6,9 +6,8 @@ import "./CompositePriceFeed.sol";
 import "../Interfaces/IWeETHToken.sol";
 import "../Interfaces/IWeETHPriceFeed.sol";
 
-
 contract WeETHPriceFeed is CompositePriceFeed, IWeETHPriceFeed {
-     constructor(
+    constructor(
         address _owner,
         address _ethUsdOracleAddress,
         address _weEthEthOracleAddress,
@@ -95,6 +94,4 @@ contract WeETHPriceFeed is CompositePriceFeed, IWeETHPriceFeed {
             return (0, true);
         }
     }
-}   
-
-
+}

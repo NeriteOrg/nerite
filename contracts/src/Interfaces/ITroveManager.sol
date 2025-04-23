@@ -13,8 +13,6 @@ import "../Types/LatestBatchData.sol";
 
 // Common interface for the Trove Manager.
 interface ITroveManager is ILiquityBase {
-
-    
     enum Status {
         nonExistent,
         active,

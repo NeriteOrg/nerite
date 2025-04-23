@@ -36,8 +36,8 @@ abstract contract AssetManager {
     // Note: returns an asset different from the currently set one
     function _getDifferentAsset() internal view returns (address differentAsset) {
         address[] memory assets_ = _getAssets();
-        for(uint256 i; i < assets_.length; i++) {
-            if(assets_[i] != __asset) {
+        for (uint256 i; i < assets_.length; i++) {
+            if (assets_[i] != __asset) {
                 differentAsset = assets_[i];
             }
         }
@@ -48,7 +48,7 @@ abstract contract AssetManager {
     }
 
     function _newAsset(uint8 decimals) internal returns (address) {
-        address asset_ =  address(new MockERC20("Test Token", "TST", decimals)); // If names get confusing, concatenate the decimals to the name
+        address asset_ = address(new MockERC20("Test Token", "TST", decimals)); // If names get confusing, concatenate the decimals to the name
         _addAsset(asset_);
         _enableAsset(asset_);
         return asset_;
@@ -86,9 +86,11 @@ abstract contract AssetManager {
     }
 
     // mint initial balance and approve allowances for the active asset
-    function _finalizeAssetDeployment(address[] memory actorsArray, address[] memory approvalArray, uint256 amount) internal {
+    function _finalizeAssetDeployment(address[] memory actorsArray, address[] memory approvalArray, uint256 amount)
+        internal
+    {
         _mintAssetToAllActors(actorsArray, amount);
-        for(uint256 i; i < approvalArray.length; i++) {
+        for (uint256 i; i < approvalArray.length; i++) {
             _approveAssetToAddressForAllActors(actorsArray, approvalArray[i]);
         }
     }

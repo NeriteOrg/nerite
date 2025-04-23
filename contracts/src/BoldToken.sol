@@ -3,12 +3,16 @@
 pragma solidity 0.8.24;
 
 // This abstract contract provides storage padding for the proxy
-import { CustomSuperTokenBase } from "@superfluid-finance/ethereum-contracts/contracts/interfaces/superfluid/CustomSuperTokenBase.sol";
+import {CustomSuperTokenBase} from
+    "@superfluid-finance/ethereum-contracts/contracts/interfaces/superfluid/CustomSuperTokenBase.sol";
 // Implementation of UUPSProxy (see https://eips.ethereum.org/EIPS/eip-1822)
-import { UUPSProxy } from "@superfluid-finance/ethereum-contracts/contracts/upgradability/UUPSProxy.sol";
+import {UUPSProxy} from "@superfluid-finance/ethereum-contracts/contracts/upgradability/UUPSProxy.sol";
 // Superfluid framework interfaces we need
-import { ISuperToken, ISuperTokenFactory, IERC20 } from "@superfluid-finance/ethereum-contracts/contracts/interfaces/superfluid/ISuperfluid.sol";
-
+import {
+    ISuperToken,
+    ISuperTokenFactory,
+    IERC20
+} from "@superfluid-finance/ethereum-contracts/contracts/interfaces/superfluid/ISuperfluid.sol";
 
 import "openzeppelin-contracts/contracts/token/ERC20/extensions/ERC20Permit.sol";
 import "./Dependencies/Ownable.sol";
@@ -24,13 +28,11 @@ import "./Interfaces/IBoldToken.sol";
  * 2) sendToPool() and returnFromPool(): functions callable only Liquity core contracts, which move USDNer tokens between Liquity <-> user.
  */
 
- //INFO: permit involves approve, so invoke safeApproveFor in supertoken
+//INFO: permit involves approve, so invoke safeApproveFor in supertoken
 
 contract BoldToken is CustomSuperTokenBase, Ownable, IBoldTokenCustom, UUPSProxy {
-
     string internal constant _NAME = "USD Nerite";
     string internal constant _SYMBOL = "USDNer";
-
 
     // --- Addresses ---
 
@@ -51,17 +53,12 @@ contract BoldToken is CustomSuperTokenBase, Ownable, IBoldTokenCustom, UUPSProxy
 
     function initialize(ISuperTokenFactory factory) external {
         // This call to the factory invokes `UUPSProxy.initialize`, which connects the proxy to the canonical SuperToken implementation.
-		// It also emits an event which facilitates discovery of this token.
-		ISuperTokenFactory(factory).initializeCustomSuperToken(address(this));
+        // It also emits an event which facilitates discovery of this token.
+        ISuperTokenFactory(factory).initializeCustomSuperToken(address(this));
 
-		// This initializes the token storage and sets the `initialized` flag of OpenZeppelin Initializable.
-		// This makes sure that it will revert if invoked more than once.
-		ISuperToken(address(this)).initialize(
-			IERC20(address(0)),
-			18,
-			_NAME,
-			_SYMBOL
-		);
+        // This initializes the token storage and sets the `initialized` flag of OpenZeppelin Initializable.
+        // This makes sure that it will revert if invoked more than once.
+        ISuperToken(address(this)).initialize(IERC20(address(0)), 18, _NAME, _SYMBOL);
     }
 
     function setBranchAddresses(
@@ -125,8 +122,7 @@ contract BoldToken is CustomSuperTokenBase, Ownable, IBoldTokenCustom, UUPSProxy
 
     function _requireCallerIsBOorAP() internal view {
         require(
-            borrowerOperationsAddresses[msg.sender] || activePoolAddresses[msg.sender],
-            "USDNer: Caller is not BO or AP"
+            borrowerOperationsAddresses[msg.sender] || activePoolAddresses[msg.sender], "USDNer: Caller is not BO or AP"
         );
     }
 
@@ -164,15 +160,20 @@ contract BoldToken is CustomSuperTokenBase, Ownable, IBoldTokenCustom, UUPSProxy
     // Storage slot for nonces (from ERC20Permit)
     mapping(address => uint256) private _nonces;
 
-    function eip712Domain() external view override returns (
-        bytes1 fields,
-        string memory name712,
-        string memory version,
-        uint256 chainId,
-        address verifyingContract,
-        bytes32 salt,
-        uint256[] memory extensions
-    ) {
+    function eip712Domain()
+        external
+        view
+        override
+        returns (
+            bytes1 fields,
+            string memory name712,
+            string memory version,
+            uint256 chainId,
+            address verifyingContract,
+            bytes32 salt,
+            uint256[] memory extensions
+        )
+    {
         return (
             hex"0f", // 01111 (all fields except salt and extensions)
             ISuperToken(address(this)).name(),
@@ -188,17 +189,12 @@ contract BoldToken is CustomSuperTokenBase, Ownable, IBoldTokenCustom, UUPSProxy
         return _nonces[owner];
     }
 
-    function permit(
-        address owner,
-        address spender,
-        uint256 value,
-        uint256 deadline,
-        uint8 v,
-        bytes32 r,
-        bytes32 s
-    ) external override {
+    function permit(address owner, address spender, uint256 value, uint256 deadline, uint8 v, bytes32 r, bytes32 s)
+        external
+        override
+    {
         if (deadline < block.timestamp) revert("PERMIT_DEADLINE_EXPIRED");
-        
+
         // Compute the digest
         bytes32 structHash = keccak256(
             abi.encode(
@@ -210,14 +206,8 @@ contract BoldToken is CustomSuperTokenBase, Ownable, IBoldTokenCustom, UUPSProxy
                 deadline
             )
         );
-        bytes32 digest = keccak256(
-            abi.encodePacked(
-                "\x19\x01",
-                DOMAIN_SEPARATOR(),
-                structHash
-            )
-        );
-        
+        bytes32 digest = keccak256(abi.encodePacked("\x19\x01", DOMAIN_SEPARATOR(), structHash));
+
         address signer = ecrecover(digest, v, r, s);
         if (signer == address(0)) revert("INVALID_SIGNATURE");
         if (signer != owner) revert("INVALID_SIGNER");
@@ -225,5 +215,4 @@ contract BoldToken is CustomSuperTokenBase, Ownable, IBoldTokenCustom, UUPSProxy
         // Finally, approve the spender
         ISuperToken(address(this)).selfApproveFor(owner, spender, value);
     }
-
 }

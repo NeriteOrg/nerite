@@ -5,7 +5,7 @@ pragma solidity 0.8.24;
 import "./TokenPriceFeedBase.sol";
 
 contract UNIPriceFeed is TokenPriceFeedBase {
-   constructor(address _owner, address _uniUsdOracleAddress, uint256 _uniUsdStalenessThreshold)
+    constructor(address _owner, address _uniUsdOracleAddress, uint256 _uniUsdStalenessThreshold)
         TokenPriceFeedBase(_owner, _uniUsdOracleAddress, _uniUsdStalenessThreshold)
     {
         _fetchPricePrimary();
@@ -45,6 +45,4 @@ contract UNIPriceFeed is TokenPriceFeedBase {
         lastGoodPrice = tokenUsdPrice;
         return (tokenUsdPrice, false);
     }
-}   
-
-
+}
