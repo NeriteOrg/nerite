@@ -587,13 +587,16 @@ contract TestDeployer is MetadataDeployment {
 
         // wstETH
         vars.priceFeeds[2] = IPriceFeed(
-            address(new WSTETHPriceFeed(
-            address(this),
-            result.externalAddresses.STETHOracle,
-            result.externalAddresses.WSTETHOracle,
-                vars.oracleParams.ethUsdStalenessThreshold,
-                vars.oracleParams.stEthUsdStalenessThreshold
-            )));
+            address(
+                new WSTETHPriceFeed(
+                    address(this),
+                    result.externalAddresses.STETHOracle,
+                    result.externalAddresses.WSTETHOracle,
+                    vars.oracleParams.ethUsdStalenessThreshold,
+                    vars.oracleParams.stEthUsdStalenessThreshold
+                )
+            )
+        );
 
         // Deploy Bold
         vars.bytecode = abi.encodePacked(type(BoldToken).creationCode, abi.encode(address(this), superTokenFactory));

@@ -13,7 +13,7 @@ abstract contract TokenPriceFeedBase is Ownable {
     // - primary: Uses the primary price calcuation, which depends on the specific feed
     // - lastGoodPrice: the last good price recorded by this PriceFeed.
 
-     enum PriceSource {
+    enum PriceSource {
         primary,
         TokenUSDxCanonical,
         lastGoodPrice
@@ -109,7 +109,6 @@ abstract contract TokenPriceFeedBase is Ownable {
             // causing a shutdown. Instead, just revert. Slightly conservative, as it includes gas used
             // in the check itself.
             if (gasleft() <= gasBefore / 64) revert InsufficientGasForExternalCall();
-
 
             // If call to Chainlink aggregator reverts, return a zero response with success = false
             return chainlinkResponse;

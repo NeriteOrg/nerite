@@ -60,5 +60,4 @@ contract WSTETHPriceFeed is IWSTETHPriceFeed, TokenPriceFeedBase {
 
         return (wstEthUsdPrice, false);
     }
-
 }

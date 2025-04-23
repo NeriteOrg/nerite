@@ -559,13 +559,16 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
             // TODO: ASSERT CORRECT ADDRESSES FOR WSTETH PRICE FEED AS CONTRACTS HAVE CHANGED
 
             vars.priceFeeds[1] = IPriceFeed(
-                address(new WSTETHPriceFeed(
-                deployer,
-                STETH_ORACLE_ADDRESS,
-                WSTETH_STETH_ORACLE_ADDRESS,
-                ETH_USD_STALENESS_THRESHOLD,
-                STETH_USD_STALENESS_THRESHOLD
-            )));
+                address(
+                    new WSTETHPriceFeed(
+                        deployer,
+                        STETH_ORACLE_ADDRESS,
+                        WSTETH_STETH_ORACLE_ADDRESS,
+                        ETH_USD_STALENESS_THRESHOLD,
+                        STETH_USD_STALENESS_THRESHOLD
+                    )
+                )
+            );
 
             // RETH
             vars.collaterals[2] = IERC20Metadata(RETH_ADDRESS);
