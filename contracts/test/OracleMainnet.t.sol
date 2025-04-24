@@ -16,7 +16,7 @@ import "./TestContracts/WSTETHTokenMock.sol";
 import "./TestContracts/Deployment.t.sol";
 
 import "src/Dependencies/AggregatorV3Interface.sol";
-import "src/Interfaces/IRETHPriceFeed.sol";
+import "src/PriceFeeds/RETHPriceFeed.sol";
 import "src/Interfaces/IWSTETHPriceFeed.sol";
 import "src/PriceFeeds/WSTETHPriceFeed.sol";
 
@@ -37,7 +37,7 @@ contract OraclesMainnet is TestAccounts {
     GasGuzzlerOracle gasGuzzlerOracle;
 
     IMainnetPriceFeed wethPriceFeed;
-    IRETHPriceFeed rethPriceFeed;
+    RETHPriceFeed rethPriceFeed;
     WSTETHPriceFeed wstethPriceFeed;
 
     IRETHToken rethToken;
@@ -131,7 +131,7 @@ contract OraclesMainnet is TestAccounts {
         }
 
         wethPriceFeed = IMainnetPriceFeed(address(contractsArray[0].priceFeed));
-        rethPriceFeed = IRETHPriceFeed(address(contractsArray[1].priceFeed));
+        rethPriceFeed = RETHPriceFeed(address(contractsArray[1].priceFeed));
         wstethPriceFeed = WSTETHPriceFeed(address(contractsArray[2].priceFeed));
 
         // log some current blockchain state
@@ -331,7 +331,7 @@ contract OraclesMainnet is TestAccounts {
     }
 
     function testEthUsdStalenessThresholdSetRETH() public view {
-        (, uint256 storedEthUsdStaleness,) = rethPriceFeed.ethUsdOracle();
+        (, uint256 storedEthUsdStaleness,) = rethPriceFeed.tokenUsdOracle();
         assertEq(storedEthUsdStaleness, _24_HOURS);
     }
 

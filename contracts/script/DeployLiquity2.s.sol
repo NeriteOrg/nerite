@@ -337,8 +337,8 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
         troveManagerParamsArray[1] = TroveManagerParams(150e16, 120e16, 110e16, 110e16, 5e16, 10e16, MAX_INT / 2); // wstETH
         troveManagerParamsArray[2] = TroveManagerParams(150e16, 120e16, 110e16, 110e16, 5e16, 10e16, MAX_INT / 2); // rETH
 
-        string[] memory collNames = new string[](2);
-        string[] memory collSymbols = new string[](2);
+        string[] memory collNames = new string[](3);
+        string[] memory collSymbols = new string[](3);
         collNames[0] = "Wrapped liquid staked Ether 2.0";
         collSymbols[0] = "wstETH";
         collNames[1] = "Rocket Pool ETH";
@@ -572,13 +572,16 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
 
             // RETH
             vars.collaterals[2] = IERC20Metadata(RETH_ADDRESS);
-            vars.priceFeeds[2] = new RETHPriceFeed(
-                deployer,
-                ETH_ORACLE_ADDRESS,
-                RETH_ORACLE_ADDRESS,
-                RETH_ADDRESS,
-                ETH_USD_STALENESS_THRESHOLD,
-                RETH_ETH_STALENESS_THRESHOLD
+            vars.priceFeeds[2] = IPriceFeed(
+                address(
+                        new RETHPriceFeed(
+                        deployer,
+                        ETH_ORACLE_ADDRESS,
+                        RETH_ORACLE_ADDRESS,
+                        ETH_USD_STALENESS_THRESHOLD,
+                        RETH_ETH_STALENESS_THRESHOLD
+                    )
+                )
             );
         } else {
             // Sepolia

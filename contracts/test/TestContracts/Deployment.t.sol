@@ -576,13 +576,16 @@ contract TestDeployer is MetadataDeployment {
         );
 
         // RETH
-        vars.priceFeeds[1] = new RETHPriceFeed(
-            address(this),
-            result.externalAddresses.ETHOracle,
-            result.externalAddresses.RETHOracle,
-            result.externalAddresses.RETHToken,
-            vars.oracleParams.ethUsdStalenessThreshold,
-            vars.oracleParams.rEthEthStalenessThreshold
+        vars.priceFeeds[1] = IPriceFeed(
+            address(
+                 new RETHPriceFeed(
+                    address(this),
+                    result.externalAddresses.ETHOracle,
+                    result.externalAddresses.RETHOracle,
+                    vars.oracleParams.ethUsdStalenessThreshold,
+                    vars.oracleParams.rEthEthStalenessThreshold
+                )
+            )
         );
 
         // wstETH
