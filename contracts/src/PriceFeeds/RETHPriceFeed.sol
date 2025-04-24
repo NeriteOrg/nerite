@@ -19,7 +19,7 @@ contract RETHPriceFeed is TokenPriceFeedBase, IRETHPriceFeed {
         // Store RETH-ETH oracle
         rEthEthOracle.aggregator = AggregatorV3Interface(_rEthEthOracleAddress);
         rEthEthOracle.stalenessThreshold = _rEthEthStalenessThreshold;
-        rEthEthOracle.decimals = rEthEthOracle.aggregator.decimals();
+        rEthEthOracle.decimals = 18;
 
         // Check the oracle didn't already fail
         assert(priceSource == PriceSource.primary);

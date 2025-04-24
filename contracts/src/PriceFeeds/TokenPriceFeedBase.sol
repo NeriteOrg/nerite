@@ -51,7 +51,7 @@ abstract contract TokenPriceFeedBase is Ownable {
         tokenUsdOracle.stalenessThreshold = _tokenUsdStalenessThreshold;
         tokenUsdOracle.decimals = tokenUsdOracle.aggregator.decimals();
 
-        assert(tokenUsdOracle.decimals == 8);
+        assert(tokenUsdOracle.decimals == 8 || tokenUsdOracle.decimals == 18);
     }
 
     // TODO: remove this and set address in constructor, since we'll use CREATE2

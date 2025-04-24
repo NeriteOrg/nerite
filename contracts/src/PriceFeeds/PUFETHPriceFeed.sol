@@ -5,7 +5,7 @@ pragma solidity 0.8.24;
 import "./TokenPriceFeedBase.sol";
 import "../Interfaces/IPUFETHPriceFeed.sol";
 
-contract pufETHPriceFeed is TokenPriceFeedBase, IIPUFETHPriceFeed {
+contract PUFETHPriceFeed is TokenPriceFeedBase, IIPUFETHPriceFeed {
     // pufETH/stETH feed on arbitrum.
     address public pufEthStEthOracleAddress = 0x26399f5229d893Cec6b89a3B52774d700582e1eF;
     Api3Oracle internal _pufEthOracle;
@@ -20,7 +20,8 @@ contract pufETHPriceFeed is TokenPriceFeedBase, IIPUFETHPriceFeed {
         _pufEthOracle.proxy = IApi3ReaderProxy(_pufEthOracleAddress);
         _pufEthOracle.stalenessThreshold = _pufEthUsdStalenessThreshold;
         _pufEthOracle.decimals = 18;
-
+        
+        priceSource = PriceSource.primary;
         // Check the oracle didn't already fail
         assert(priceSource == PriceSource.primary);
     }

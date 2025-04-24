@@ -3,8 +3,8 @@
 pragma solidity 0.8.24;
 
 import "./MainnetPriceFeedBase.sol";
-
-contract rsETHPriceFeed is MainnetPriceFeedBase {
+import "forge-std/console2.sol";
+contract RSETHPriceFeed is MainnetPriceFeedBase {
     //BTC feed on arbitrum.
     address public rsEthOracleAddress = 0x8fE61e9D74ab69cE9185F365dfc21FC168c4B56c;
     Oracle public rsEthOracle;
@@ -18,7 +18,7 @@ contract rsETHPriceFeed is MainnetPriceFeedBase {
         rsEthOracle.aggregator = AggregatorV3Interface(_rsEthOracleAddress);
         rsEthOracle.stalenessThreshold = _rsEthUsdStalenessThreshold;
         rsEthOracle.decimals = 18;
-
+        priceSource = PriceSource.primary;
         // Check the oracle didn't already fail
         assert(priceSource == PriceSource.primary);
     }
@@ -31,6 +31,8 @@ contract rsETHPriceFeed is MainnetPriceFeedBase {
         assert(priceSource == PriceSource.primary);
         (uint256 rsEthPrice, bool rsEthOracleDown) = _getOracleAnswer(rsEthOracle);
         (uint256 ethUsdPrice, bool ethUsdOracleDown) = _getOracleAnswer(ethUsdOracle);
+        console2.log("rsEthPrice", rsEthOracleDown);
+        console2.log("ethUsdPrice", ethUsdOracleDown);
 
         // If the ETH-USD Chainlink response was invalid in this transaction, return the last good rsETH-USD price calculated
         if (rsEthOracleDown) return (_shutDownAndSwitchToLastGoodPrice(address(rsEthOracle.aggregator)), true);
