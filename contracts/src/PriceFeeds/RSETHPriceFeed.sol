@@ -13,8 +13,9 @@ contract RSETHPriceFeed is MainnetPriceFeedBase {
         address _owner,
         address _ethUsdOracleAddress,
         address _rsEthOracleAddress,
+        uint256 _ethUsdStalenessThreshold,
         uint256 _rsEthUsdStalenessThreshold
-    ) MainnetPriceFeedBase(_owner, _ethUsdOracleAddress, _rsEthUsdStalenessThreshold) {
+    ) MainnetPriceFeedBase(_owner, _ethUsdOracleAddress, _ethUsdStalenessThreshold) {
         rsEthOracle.aggregator = AggregatorV3Interface(_rsEthOracleAddress);
         rsEthOracle.stalenessThreshold = _rsEthUsdStalenessThreshold;
         rsEthOracle.decimals = 18;
@@ -31,8 +32,6 @@ contract RSETHPriceFeed is MainnetPriceFeedBase {
         assert(priceSource == PriceSource.primary);
         (uint256 rsEthPrice, bool rsEthOracleDown) = _getOracleAnswer(rsEthOracle);
         (uint256 ethUsdPrice, bool ethUsdOracleDown) = _getOracleAnswer(ethUsdOracle);
-        console2.log("rsEthPrice", rsEthOracleDown);
-        console2.log("ethUsdPrice", ethUsdOracleDown);
 
         // If the ETH-USD Chainlink response was invalid in this transaction, return the last good rsETH-USD price calculated
         if (rsEthOracleDown) return (_shutDownAndSwitchToLastGoodPrice(address(rsEthOracle.aggregator)), true);

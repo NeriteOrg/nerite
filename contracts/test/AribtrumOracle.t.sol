@@ -40,7 +40,7 @@ contract ArbitrumOracles is Test {
     address public ETH_ORACLE_ADDRESS = 0x639Fe6ab55C921f74e7fac1ee960C0B6293ba612;
     address public PUFFETH_ORACLE_ADDRESS = 0x26399f5229d893Cec6b89a3B52774d700582e1eF;
     address public RSETH_ORACLE_ADDRESS = 0x8fE61e9D74ab69cE9185F365dfc21FC168c4B56c;
-    address public RETH_ORACLE_ADDRESS = 0x536218f9E9Eb48863970252233c8F271f554C2d0;
+    address public RETH_ORACLE_ADDRESS = 0xD6aB2298946840262FcC278fF31516D39fF611eF;
     address public STETH_ORACLE_ADDRESS = 0x07C5b924399cc23c24a95c8743DE4006a32b7f2a;
     address public WSTETH_STETH_ORACLE_ADDRESS = 0xB1552C5e96B312d0Bf8b554186F846C40614a540;
     address public WSTETH_ETH_ORACLE_ADDRESS = 0xb523AE262D20A936BC152e6023996e46FDC2A95D;
@@ -61,6 +61,7 @@ contract ArbitrumOracles is Test {
             address(this),
             ETH_ORACLE_ADDRESS,
             RSETH_ORACLE_ADDRESS,
+            24 hours,
             24 hours
         );
         vm.label(address(_rsETHPriceFeed), "RSETHPriceFeed");
@@ -71,8 +72,8 @@ contract ArbitrumOracles is Test {
             address(this),
             STETH_ORACLE_ADDRESS,
             PUFFETH_ORACLE_ADDRESS,
-            1 hours,
-            1 hours
+            24 hours,
+            24 hours
         );
         vm.label(address(_pufETHPriceFeed), "PUFETHPriceFeed");
     }
@@ -82,8 +83,8 @@ contract ArbitrumOracles is Test {
             address(this),
             WSTETH_STETH_ORACLE_ADDRESS,
             WSTETH_ETH_ORACLE_ADDRESS,
-            1 hours,
-            1 hours
+            24 hours,
+            24 hours
         );
         vm.label(address(_wstethPriceFeed), "WSTETHPriceFeed");
     }
@@ -93,15 +94,37 @@ contract ArbitrumOracles is Test {
             address(this),
             ETH_ORACLE_ADDRESS,
             RETH_ORACLE_ADDRESS,
-            1 hours,
-            1 hours
+            24 hours,
+            24 hours
         );
         vm.label(address(_rEthPriceFeed), "RETHPriceFeed");
         }
 
     function test_rsETHPriceFeed() public {
         (uint256 price, bool oracleDown) = rsETHPriceFeed.fetchPrice();
-      assertTrue(oracleDown);
+     
       assertGt(price, 0);
+    assertFalse(oracleDown);
+    }
+
+    function test_pufETHPriceFeed() public {
+        (uint256 price, bool oracleDown) = pufETHPriceFeed.fetchPrice();
+     
+        assertGt(price, 0);
+        assertFalse(oracleDown);
+    }
+
+    function test_wstethPriceFeed() public {
+        (uint256 price, bool oracleDown) = wstethPriceFeed.fetchPrice();
+     
+        assertGt(price, 0);
+        assertFalse(oracleDown);
+    }
+
+    function test_rEthPriceFeed() public {
+        (uint256 price, bool oracleDown) = rEthPriceFeed.fetchPrice();
+     
+        assertGt(price, 0);
+        assertFalse(oracleDown);
     }
 }
