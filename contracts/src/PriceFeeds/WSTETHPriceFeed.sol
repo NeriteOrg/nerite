@@ -28,7 +28,7 @@ contract WSTETHPriceFeed is IWSTETHPriceFeed, TokenPriceFeedBase {
         wstEthStethOracle.aggregator = AggregatorV3Interface(_wstEthStEthOracleAddress);
         wstEthStethOracle.stalenessThreshold = _wstEthStEthStalenessThreshold;
         wstEthStethOracle.decimals = wstEthStethOracle.aggregator.decimals();
-        
+
         priceSource = PriceSource.primary;
         // Check the oracle didn't already fail
         assert(priceSource == PriceSource.primary);

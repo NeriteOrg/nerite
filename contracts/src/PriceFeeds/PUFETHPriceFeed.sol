@@ -5,6 +5,7 @@ pragma solidity 0.8.24;
 import "./TokenPriceFeedBase.sol";
 import "../Interfaces/IPUFETHPriceFeed.sol";
 import "forge-std/console2.sol";
+
 contract PUFETHPriceFeed is TokenPriceFeedBase, IIPUFETHPriceFeed {
     // pufETH/stETH feed on arbitrum.
     address public pufEthStEthOracleAddress = 0x26399f5229d893Cec6b89a3B52774d700582e1eF;
@@ -20,7 +21,7 @@ contract PUFETHPriceFeed is TokenPriceFeedBase, IIPUFETHPriceFeed {
         _pufEthOracle.proxy = IApi3ReaderProxy(_pufEthOracleAddress);
         _pufEthOracle.stalenessThreshold = _pufEthUsdStalenessThreshold;
         _pufEthOracle.decimals = 18;
-        
+
         priceSource = PriceSource.primary;
         // Check the oracle didn't already fail
         assert(priceSource == PriceSource.primary);
@@ -36,8 +37,8 @@ contract PUFETHPriceFeed is TokenPriceFeedBase, IIPUFETHPriceFeed {
 
         bool oracleIsDown = block.timestamp - pufEthStEthTimestamp > _oracle.stalenessThreshold;
 
-        if(oracleRate == 0) {
-            bool oracleIsDown = true;
+        if (oracleRate <= 0) {
+            oracleIsDown = true;
         }
 
         return (oracleRate, oracleIsDown);
@@ -57,17 +58,7 @@ contract PUFETHPriceFeed is TokenPriceFeedBase, IIPUFETHPriceFeed {
             _shutDownAndSwitchToLastGoodPrice(address(tokenUsdOracle.aggregator));
         }
 
-        uint256 pufEthUsdPrice;
-
-        if (pufEthStEthRate > 0) {
-            uint256 positiveRate = uint256(pufEthStEthRate);
-
-            // Calculate the canonical LST-USD price: USD_per_LST = USD_per_ETH * underlying_per_LST
-            pufEthUsdPrice = stEthUsdRate * positiveRate / 1e18;
-        } else {
-            pufEthUsdPrice = stEthUsdRate / uint256(-pufEthStEthRate);
-        }
-
+        uint256 pufEthUsdPrice = stEthUsdRate * uint256(pufEthStEthRate) / 1e18;
 
         lastGoodPrice = pufEthUsdPrice;
         return (pufEthUsdPrice, false);

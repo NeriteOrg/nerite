@@ -47,8 +47,7 @@ contract RETHPriceFeed is TokenPriceFeedBase, IRETHPriceFeed {
         // Otherwise, use the primary price calculation:
 
         // Calculate the market RETH-USD price: USD_per_RETH = USD_per_ETH * ETH_per_RETH
-          uint256 rEthUsdPrice = ethUsdPrice * rEthEthPrice / 1e18;
-
+        uint256 rEthUsdPrice = ethUsdPrice * rEthEthPrice / 1e18;
 
         lastGoodPrice = rEthUsdPrice;
 

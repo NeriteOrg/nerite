@@ -578,7 +578,7 @@ contract TestDeployer is MetadataDeployment {
         // RETH
         vars.priceFeeds[1] = IPriceFeed(
             address(
-                 new RETHPriceFeed(
+                new RETHPriceFeed(
                     address(this),
                     result.externalAddresses.ETHOracle,
                     result.externalAddresses.RETHOracle,

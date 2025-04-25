@@ -574,7 +574,7 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
             vars.collaterals[2] = IERC20Metadata(RETH_ADDRESS);
             vars.priceFeeds[2] = IPriceFeed(
                 address(
-                        new RETHPriceFeed(
+                    new RETHPriceFeed(
                         deployer,
                         ETH_ORACLE_ADDRESS,
                         RETH_ORACLE_ADDRESS,
