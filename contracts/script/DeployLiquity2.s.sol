@@ -79,6 +79,8 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
     address ETH_ORACLE_ADDRESS = 0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419;
     address RETH_ORACLE_ADDRESS = 0x536218f9E9Eb48863970252233c8F271f554C2d0;
     address STETH_ORACLE_ADDRESS = 0xCfE54B5cD566aB89272946F602D76Ea879CAb4a8;
+    address WSTETH_STETH_ORACLE_ADDRESS = 0xB1552C5e96B312d0Bf8b554186F846C40614a540;
+    address WSTETH_ETH_ORACLE_ADDRESS = 0xb523AE262D20A936BC152e6023996e46FDC2A95D;
     uint256 ETH_USD_STALENESS_THRESHOLD = 24 hours;
     uint256 STETH_USD_STALENESS_THRESHOLD = 24 hours;
     uint256 RETH_ETH_STALENESS_THRESHOLD = 48 hours;
@@ -331,9 +333,9 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
 
         TroveManagerParams[] memory troveManagerParamsArray = new TroveManagerParams[](3);
         // TODO: move params out of here
-        troveManagerParamsArray[0] = TroveManagerParams(150e16, 110e16, 10e16, 110e16, 5e16, 10e16, MAX_INT/2); // WETH
-        troveManagerParamsArray[1] = TroveManagerParams(150e16, 120e16, 110e16, 110e16, 5e16, 10e16, MAX_INT/2); // wstETH
-        troveManagerParamsArray[2] = TroveManagerParams(150e16, 120e16, 110e16, 110e16, 5e16, 10e16, MAX_INT/2); // rETH
+        troveManagerParamsArray[0] = TroveManagerParams(150e16, 110e16, 10e16, 110e16, 5e16, 10e16, MAX_INT / 2); // WETH
+        troveManagerParamsArray[1] = TroveManagerParams(150e16, 120e16, 110e16, 110e16, 5e16, 10e16, MAX_INT / 2); // wstETH
+        troveManagerParamsArray[2] = TroveManagerParams(150e16, 120e16, 110e16, 110e16, 5e16, 10e16, MAX_INT / 2); // rETH
 
         string[] memory collNames = new string[](2);
         string[] memory collSymbols = new string[](2);
@@ -554,24 +556,30 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
 
             // wstETH
             vars.collaterals[1] = IERC20Metadata(WSTETH_ADDRESS);
-            vars.priceFeeds[1] = new WSTETHPriceFeed(
-                deployer,
-                ETH_ORACLE_ADDRESS,
-                STETH_ORACLE_ADDRESS,
-                WSTETH_ADDRESS,
-                ETH_USD_STALENESS_THRESHOLD,
-                STETH_USD_STALENESS_THRESHOLD
+            vars.priceFeeds[1] = IPriceFeed(
+                address(
+                    new WSTETHPriceFeed(
+                        deployer,
+                        STETH_ORACLE_ADDRESS,
+                        WSTETH_STETH_ORACLE_ADDRESS,
+                        ETH_USD_STALENESS_THRESHOLD,
+                        STETH_USD_STALENESS_THRESHOLD
+                    )
+                )
             );
 
             // RETH
             vars.collaterals[2] = IERC20Metadata(RETH_ADDRESS);
-            vars.priceFeeds[2] = new RETHPriceFeed(
-                deployer,
-                ETH_ORACLE_ADDRESS,
-                RETH_ORACLE_ADDRESS,
-                RETH_ADDRESS,
-                ETH_USD_STALENESS_THRESHOLD,
-                RETH_ETH_STALENESS_THRESHOLD
+            vars.priceFeeds[2] = IPriceFeed(
+                address(
+                    new RETHPriceFeed(
+                        deployer,
+                        ETH_ORACLE_ADDRESS,
+                        RETH_ORACLE_ADDRESS,
+                        ETH_USD_STALENESS_THRESHOLD,
+                        RETH_ETH_STALENESS_THRESHOLD
+                    )
+                )
             );
         } else {
             // Sepolia

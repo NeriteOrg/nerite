@@ -50,8 +50,7 @@ import {SuperfluidFrameworkDeployer} from
     "@superfluid-finance/ethereum-contracts/contracts/utils/SuperfluidFrameworkDeployer.t.sol";
 import {ERC1820RegistryCompiled} from
     "@superfluid-finance/ethereum-contracts/contracts/libs/ERC1820RegistryCompiled.sol";
-import { SuperTokenV1Library } from "@superfluid-finance/ethereum-contracts/contracts/apps/SuperTokenV1Library.sol";
-
+import {SuperTokenV1Library} from "@superfluid-finance/ethereum-contracts/contracts/apps/SuperTokenV1Library.sol";
 
 import "forge-std/console2.sol";
 
@@ -204,6 +203,7 @@ contract TestDeployer is MetadataDeployment {
         address RETHOracle;
         address WSTETHToken;
         address RETHToken;
+        address WSTETHOracle;
     }
 
     struct OracleParams {
@@ -217,7 +217,11 @@ contract TestDeployer is MetadataDeployment {
         return abi.encodePacked(_creationCode, abi.encode(_addressesRegistry));
     }
 
-    function getBytecodeWithGovernor(bytes memory _creationCode, address _addressesRegistry, address _governor) public pure returns (bytes memory) {
+    function getBytecodeWithGovernor(bytes memory _creationCode, address _addressesRegistry, address _governor)
+        public
+        pure
+        returns (bytes memory)
+    {
         return abi.encodePacked(_creationCode, abi.encode(_addressesRegistry, _governor));
     }
 
@@ -242,7 +246,7 @@ contract TestDeployer is MetadataDeployment {
             Zappers memory zappers
         )
     {
-        return deployAndConnectContracts(TroveManagerParams(150e16, 110e16, 10e16, 110e16, 5e16, 10e16, MAX_INT/2));
+        return deployAndConnectContracts(TroveManagerParams(150e16, 110e16, 10e16, 110e16, 5e16, 10e16, MAX_INT / 2));
     }
 
     function deployAndConnectContracts(TroveManagerParams memory troveManagerParams)
@@ -444,7 +448,9 @@ contract TestDeployer is MetadataDeployment {
         );
         addresses.troveManager = _troveManagerAddress;
         addresses.troveNFT = getAddress(
-            address(this), getBytecodeWithGovernor(type(TroveNFT).creationCode, address(contracts.addressesRegistry), address(0)), SALT
+            address(this),
+            getBytecodeWithGovernor(type(TroveNFT).creationCode, address(contracts.addressesRegistry), address(0)),
+            SALT
         );
         addresses.stabilityPool = getAddress(
             address(this), getBytecode(type(StabilityPool).creationCode, address(contracts.addressesRegistry)), SALT
@@ -536,7 +542,6 @@ contract TestDeployer is MetadataDeployment {
         public
         returns (DeploymentResultMainnet memory result)
     {
-
         //setup SF factories.
         ISuperTokenFactory superTokenFactory = ISuperTokenFactory(0x0000000000000000000000000000000000000000);
 
@@ -546,7 +551,7 @@ contract TestDeployer is MetadataDeployment {
         result.externalAddresses.RETHOracle = 0x536218f9E9Eb48863970252233c8F271f554C2d0;
         result.externalAddresses.STETHOracle = 0xCfE54B5cD566aB89272946F602D76Ea879CAb4a8;
         result.externalAddresses.WSTETHToken = 0x7f39C581F595B53c5cb19bD0b3f8dA6c935E2Ca0;
-
+        result.externalAddresses.WSTETHOracle = 0x164b276057258d81941e97B0a900D4C7B358bCe0;
         result.externalAddresses.RETHToken = 0xae78736Cd615f374D3085123A210448E74Fc6393;
 
         vars.oracleParams.ethUsdStalenessThreshold = _24_HOURS;
@@ -570,23 +575,29 @@ contract TestDeployer is MetadataDeployment {
         );
 
         // RETH
-        vars.priceFeeds[1] = new RETHPriceFeed(
-            address(this),
-            result.externalAddresses.ETHOracle,
-            result.externalAddresses.RETHOracle,
-            result.externalAddresses.RETHToken,
-            vars.oracleParams.ethUsdStalenessThreshold,
-            vars.oracleParams.rEthEthStalenessThreshold
+        vars.priceFeeds[1] = IPriceFeed(
+            address(
+                new RETHPriceFeed(
+                    address(this),
+                    result.externalAddresses.ETHOracle,
+                    result.externalAddresses.RETHOracle,
+                    vars.oracleParams.ethUsdStalenessThreshold,
+                    vars.oracleParams.rEthEthStalenessThreshold
+                )
+            )
         );
 
         // wstETH
-        vars.priceFeeds[2] = new WSTETHPriceFeed(
-            address(this),
-            result.externalAddresses.ETHOracle,
-            result.externalAddresses.STETHOracle,
-            result.externalAddresses.WSTETHToken,
-            vars.oracleParams.ethUsdStalenessThreshold,
-            vars.oracleParams.stEthUsdStalenessThreshold
+        vars.priceFeeds[2] = IPriceFeed(
+            address(
+                new WSTETHPriceFeed(
+                    address(this),
+                    result.externalAddresses.STETHOracle,
+                    result.externalAddresses.WSTETHOracle,
+                    vars.oracleParams.ethUsdStalenessThreshold,
+                    vars.oracleParams.stEthUsdStalenessThreshold
+                )
+            )
         );
 
         // Deploy Bold
@@ -688,7 +699,9 @@ contract TestDeployer is MetadataDeployment {
         );
         addresses.troveManager = _params.troveManagerAddress;
         addresses.troveNFT = getAddress(
-            address(this), getBytecodeWithGovernor(type(TroveNFT).creationCode, address(contracts.addressesRegistry), address(0)), SALT
+            address(this),
+            getBytecodeWithGovernor(type(TroveNFT).creationCode, address(contracts.addressesRegistry), address(0)),
+            SALT
         );
         addresses.stabilityPool = getAddress(
             address(this), getBytecode(type(StabilityPool).creationCode, address(contracts.addressesRegistry)), SALT
