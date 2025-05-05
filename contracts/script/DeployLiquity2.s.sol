@@ -255,7 +255,7 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
 
         uint256 epochStart = vm.envOr(
             "EPOCH_START",
-            (block.chainid == 1 ? _latestUTCMidnightBetweenWednesdayAndThursday() : block.timestamp) - EPOCH_DURATION
+            (block.chainid == 42161 ? _latestUTCMidnightBetweenWednesdayAndThursday() : block.timestamp) - EPOCH_DURATION
         );
 
         useTestnetPriceFeeds = vm.envOr("USE_TESTNET_PRICEFEEDS", false);
@@ -291,7 +291,7 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
             return;
         }
 
-        if (block.chainid == 1) {
+        if (block.chainid == 42161) {
             // mainnet
             WETH = IWETH(WETH_ADDRESS);
             USDC = IERC20Metadata(USDC_ADDRESS);
@@ -355,8 +355,8 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
         DeploymentResult memory deployed =
             _deployAndConnectContracts(troveManagerParamsArray, collNames, collSymbols, deployGovernanceParams);
 
-        if (block.chainid == 11155111) {
-            // Provide liquidity for zaps if we're on Sepolia
+        if (block.chainid == 421614) {
+            // Provide liquidity for zaps if we're on Arbitrum Sepolia
             ERC20Faucet monkeyBalls = new ERC20Faucet("MonkeyBalls", "MB", 0, type(uint256).max);
             for (uint256 i = 0; i < deployed.contractsArray.length; ++i) {
                 PriceFeedTestnet(address(deployed.contractsArray[i].priceFeed)).setPrice(2_000 ether);
@@ -405,7 +405,7 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
         }
 
         ICurveStableswapNGPool lusdCurvePool;
-        if (block.chainid == 1) {
+        if (block.chainid == 42161) {
             lusdCurvePool = _deployCurvePool(deployed.boldToken, IERC20Metadata(LUSD_ADDRESS));
         }
 
@@ -546,7 +546,7 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
         vars.addressesRegistries = new IAddressesRegistry[](vars.numCollaterals);
         vars.troveManagers = new ITroveManager[](vars.numCollaterals);
 
-        if (block.chainid == 1 && !useTestnetPriceFeeds) {
+        if (block.chainid == 42161 && !useTestnetPriceFeeds) {
             // mainnet
             // ETH
             vars.collaterals[0] = IERC20Metadata(WETH);
