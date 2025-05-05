@@ -67,18 +67,30 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
     string constant DEPLOYMENT_MODE_BOLD_ONLY = "bold-only";
     string constant DEPLOYMENT_MODE_USE_EXISTING_BOLD = "use-existing-bold";
 
-    address WETH_ADDRESS = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
-    address USDC_ADDRESS = 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48;
+    address WETH_ADDRESS = 0x82aF49447D8a07e3bd95BD0d56f35241523fBab1;
+    address USDC_ADDRESS = 0xaf88d065e77c8cc2239327c5edb3a432268e5831;
 
     // used for gas compensation and as collateral of the first branch
     // tapping disallowed
     IWETH WETH;
     IERC20Metadata USDC;
-    address WSTETH_ADDRESS = 0x7f39C581F595B53c5cb19bD0b3f8dA6c935E2Ca0;
-    address RETH_ADDRESS = 0xae78736Cd615f374D3085123A210448E74Fc6393;
-    address ETH_ORACLE_ADDRESS = 0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419;
-    address RETH_ORACLE_ADDRESS = 0x536218f9E9Eb48863970252233c8F271f554C2d0;
-    address STETH_ORACLE_ADDRESS = 0xCfE54B5cD566aB89272946F602D76Ea879CAb4a8;
+    // collateral addresses
+    address ETH_ADDRESS = 0xfc5a1a6eb076a2c7ad06ed22c90d7e710e35ad0a;
+    address WEETH_ADDRESS = 0x35751007a407ca6feffe80b3cb397736d2cf4dbe;
+    address WSTETH_ADDRESS = 0x5979d7b546e38e414f7e9822514be443a4800529;
+    address RETH_ADDRESS = 0xEC70Dcb4A1EFa46b8F2D97C310C9c4790ba5ffA8;
+    address EZETH_ADDRESS = 0x2416092f143378750bb29b79ed961ab195cceea5;
+    address ARB_ADDRESS = 0x912ce59144191c1204e64559fe8253a0e49e6548;
+    address XVS_ADDRESS = 0xc1Eb7689147C81aC840d4FF0D298489fc7986d52;
+    address COMP_ADDRESS = 0x354a6da3fcde098f8389cad84b0182725c6c91de;
+    address TBTC_ADDRESS = 0x6c84a8f1c29108F47a79964b5Fe888D4f4D0dE40;
+
+    // chainlink price feeds
+    address ETH_ORACLE_ADDRESS = 0x639Fe6ab55C921f74e7fac1ee960C0B6293ba612;  // eth/usd
+    address RETH_ORACLE_ADDRESS = 0xD6aB2298946840262FcC278fF31516D39fF611eF;  // reth/eth
+    address STETH_ORACLE_ADDRESS = 0xded2c52b75B24732e9107377B7Ba93eC1fFa4BAf;  // steth/eth
+
+    // stale thresholds
     uint256 ETH_USD_STALENESS_THRESHOLD = 24 hours;
     uint256 STETH_USD_STALENESS_THRESHOLD = 24 hours;
     uint256 RETH_ETH_STALENESS_THRESHOLD = 48 hours;
