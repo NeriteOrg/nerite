@@ -126,6 +126,9 @@ const CONTRACTS: Contracts = {
       CollSurplusPool: { address: contracts.COLL_SURPLUS_POOL, abi: abis.CollSurplusPool },
       CollToken: { address: contracts.COLL_TOKEN, abi: abis.CollToken },
       DefaultPool: { address: contracts.DEFAULT_POOL, abi: abis.DefaultPool },
+      //////////////////////////////////////////////////////////////
+      // *** TODO ***
+      // MUST FIX. Zappers are broken for now
       LeverageLSTZapper: {
         address: symbol === "ETH" ? zeroAddress : contracts.LEVERAGE_ZAPPER,
         abi: abis.LeverageLSTZapper,
@@ -134,6 +137,7 @@ const CONTRACTS: Contracts = {
         address: symbol === "ETH" ? contracts.LEVERAGE_ZAPPER : zeroAddress,
         abi: abis.LeverageWETHZapper,
       },
+      //////////////////////////////////////////////////////////////
       PriceFeed: { address: contracts.PRICE_FEED, abi: abis.PriceFeed },
       SortedTroves: { address: contracts.SORTED_TROVES, abi: abis.SortedTroves },
       StabilityPool: { address: contracts.STABILITY_POOL, abi: abis.StabilityPool },

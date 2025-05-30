@@ -214,6 +214,8 @@ export const updateLeveragePosition: FlowDeclaration<UpdateLeveragePositionReque
               `Invalid collateral index: ${ctx.request.loan.collIndex}`
             );
           }
+          // *** TODO ***
+          // MUST FIX. Zappers are broken for now
           const Zapper = collateral.contracts.LeverageLSTZapper;
 
           return ctx.writeContract({
@@ -251,6 +253,8 @@ export const updateLeveragePosition: FlowDeclaration<UpdateLeveragePositionReque
             );
           }
 
+          // *** TODO ***
+          // MUST FIX. Zappers are broken for now
           // add ETH
           if (collateral.symbol === "ETH") {
             return ctx.writeContract({
@@ -296,6 +300,8 @@ export const updateLeveragePosition: FlowDeclaration<UpdateLeveragePositionReque
             );
           }
 
+          // *** TODO ***
+          // MUST FIX. Zappers are broken for now
           const args = [
             BigInt(ctx.request.loan.troveId),
             ctx.request.depositChange[0] * -1n,
@@ -352,6 +358,8 @@ export const updateLeveragePosition: FlowDeclaration<UpdateLeveragePositionReque
             );
           }
 
+          // *** TODO ***
+          // MUST FIX. Zappers are broken for now
           const args = [
             {
               troveId: BigInt(ctx.request.loan.troveId),
@@ -412,6 +420,8 @@ export const updateLeveragePosition: FlowDeclaration<UpdateLeveragePositionReque
             );
           }
 
+          // *** TODO ***
+          // MUST FIX. Zappers are broken for now
           const args = [
             {
               troveId: BigInt(ctx.request.loan.troveId),
@@ -457,6 +467,8 @@ export const updateLeveragePosition: FlowDeclaration<UpdateLeveragePositionReque
         depositChange &&
         dn.gt(depositChange, 0)
       ) {
+        // *** TODO ***
+        // MUST FIX. Zappers are broken for now
         const { LeverageLSTZapper, CollToken } = collateral.contracts;
         const allowance = dnum18(
           await ctx.readContract({

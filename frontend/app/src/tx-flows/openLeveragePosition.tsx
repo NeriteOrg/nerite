@@ -171,6 +171,8 @@ export const openLeveragePosition: FlowDeclaration<OpenLeveragePositionRequest> 
           if (!collateral) {
             throw new Error("Invalid collateral index: " + loan.collIndex);
           }
+          // *** TODO ***
+          // MUST FIX. Zappers are broken for now
           const { LeverageLSTZapper, CollToken } = collateral.contracts;
 
           return ctx.writeContract({
@@ -203,6 +205,8 @@ export const openLeveragePosition: FlowDeclaration<OpenLeveragePositionRequest> 
           if (!collateral) {
             throw new Error("Invalid collateral index: " + loan.collIndex);
           }
+          // *** TODO ***
+          // MUST FIX. Zappers are broken for now
           const { LeverageLSTZapper, LeverageWETHZapper } =
             collateral.contracts;
 
@@ -314,16 +318,19 @@ export const openLeveragePosition: FlowDeclaration<OpenLeveragePositionRequest> 
         throw new Error("Invalid collateral index: " + loan.collIndex);
       }
 
+      
       // ETH doesn't need approval
       if (collToken.symbol === "ETH") {
         return ["openLeveragedTrove"];
       }
-
+      
       const { collaterals } = ctx.contracts;
       const collateral = collaterals[loan.collIndex];
       if (!collateral) {
         throw new Error("Invalid collateral index: " + loan.collIndex);
       }
+      // *** TODO ***
+      // MUST FIX. Zappers are broken for now
       const { LeverageLSTZapper, CollToken } = collateral.contracts;
 
       const allowance = dnum18(

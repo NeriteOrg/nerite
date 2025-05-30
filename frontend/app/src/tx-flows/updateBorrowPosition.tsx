@@ -159,6 +159,8 @@ export const updateBorrowPosition: FlowDeclaration<UpdateBorrowPositionRequest> 
               "Invalid collateral index: " + ctx.request.loan.collIndex
             );
           }
+          // *** TODO ***
+          // MUST FIX. Zappers are broken for now
           const Controller =
             collateral.symbol === "ETH"
               ? collateral.contracts.LeverageWETHZapper
@@ -207,6 +209,8 @@ export const updateBorrowPosition: FlowDeclaration<UpdateBorrowPositionRequest> 
             );
           }
 
+          // *** TODO ***
+          // MUST FIX. Zappers are broken for now
           const Controller = collateral.contracts.LeverageLSTZapper;
 
           return ctx.writeContract({
@@ -243,6 +247,8 @@ export const updateBorrowPosition: FlowDeclaration<UpdateBorrowPositionRequest> 
           }
 
           return ctx.writeContract({
+            // *** TODO ***
+            // MUST FIX. Zappers are broken for now
             ...collateral.contracts.LeverageLSTZapper,
             functionName: "adjustTrove",
             args: [
@@ -275,6 +281,8 @@ export const updateBorrowPosition: FlowDeclaration<UpdateBorrowPositionRequest> 
 
           if (collateral.symbol === "ETH") {
             return ctx.writeContract({
+              // *** TODO ***
+              // MUST FIX. Zappers are broken for now
               ...collateral.contracts.LeverageWETHZapper,
               functionName: "repayBold",
               args: [BigInt(loan.troveId), dn.abs(debtChange)[0]],
@@ -282,6 +290,8 @@ export const updateBorrowPosition: FlowDeclaration<UpdateBorrowPositionRequest> 
           }
 
           return ctx.writeContract({
+            // *** TODO ***
+            // MUST FIX. Zappers are broken for now
             ...collateral.contracts.LeverageLSTZapper,
             functionName: "repayBold",
             args: [BigInt(loan.troveId), dn.abs(debtChange)[0]],
@@ -307,6 +317,8 @@ export const updateBorrowPosition: FlowDeclaration<UpdateBorrowPositionRequest> 
 
           if (collateral.symbol === "ETH") {
             return ctx.writeContract({
+              // *** TODO ***
+              // MUST FIX. Zappers are broken for now
               ...collateral.contracts.LeverageWETHZapper,
               functionName: "addCollWithRawETH",
               args: [BigInt(loan.troveId)],
@@ -315,6 +327,8 @@ export const updateBorrowPosition: FlowDeclaration<UpdateBorrowPositionRequest> 
           }
 
           return ctx.writeContract({
+            // *** TODO ***
+            // MUST FIX. Zappers are broken for now
             ...collateral.contracts.LeverageLSTZapper,
             functionName: "addColl",
             args: [BigInt(loan.troveId), dn.abs(collChange)[0]],
@@ -340,6 +354,8 @@ export const updateBorrowPosition: FlowDeclaration<UpdateBorrowPositionRequest> 
 
           if (collateral.symbol === "ETH") {
             return ctx.writeContract({
+              // *** TODO ***
+              // MUST FIX. Zappers are broken for now
               ...collateral.contracts.LeverageWETHZapper,
               functionName: "withdrawBold",
               args: [
@@ -351,6 +367,8 @@ export const updateBorrowPosition: FlowDeclaration<UpdateBorrowPositionRequest> 
           }
 
           return ctx.writeContract({
+            // *** TODO ***
+            // MUST FIX. Zappers are broken for now
             ...collateral.contracts.LeverageLSTZapper,
             functionName: "withdrawBold",
             args: [
@@ -380,6 +398,8 @@ export const updateBorrowPosition: FlowDeclaration<UpdateBorrowPositionRequest> 
 
           if (collateral.symbol === "ETH") {
             return ctx.writeContract({
+              // *** TODO ***
+              // MUST FIX. Zappers are broken for now
               ...collateral.contracts.LeverageWETHZapper,
               functionName: "withdrawCollToRawETH",
               args: [BigInt(loan.troveId), dn.abs(collChange)[0]],
@@ -413,6 +433,8 @@ export const updateBorrowPosition: FlowDeclaration<UpdateBorrowPositionRequest> 
         );
       }
 
+      // *** TODO ***
+      // MUST FIX. Zappers are broken for now
       const Controller =
         coll.symbol === "ETH"
           ? coll.contracts.LeverageWETHZapper

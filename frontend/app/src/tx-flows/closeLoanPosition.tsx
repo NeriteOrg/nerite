@@ -122,6 +122,8 @@ export const closeLoanPosition: FlowDeclaration<CloseLoanPositionRequest> = {
           args: [BigInt(loan.troveId)],
         });
 
+        // *** TODO ***
+        // MUST FIX. Zappers are broken for now
         const Zapper =
           coll.symbol === "ETH"
             ? coll.contracts.LeverageWETHZapper
@@ -158,6 +160,8 @@ export const closeLoanPosition: FlowDeclaration<CloseLoanPositionRequest> = {
         // repay with USDN => get ETH
         if (!ctx.request.repayWithCollateral && coll.symbol === "ETH") {
           return ctx.writeContract({
+            // *** TODO ***
+            // MUST FIX. Zappers are broken for now
             ...coll.contracts.LeverageWETHZapper,
             functionName: "closeTroveToRawETH",
             args: [BigInt(loan.troveId)],
@@ -167,6 +171,8 @@ export const closeLoanPosition: FlowDeclaration<CloseLoanPositionRequest> = {
         // repay with USDN => get LST
         if (!ctx.request.repayWithCollateral) {
           return ctx.writeContract({
+            // *** TODO ***
+            // MUST FIX. Zappers are broken for now
             ...coll.contracts.LeverageLSTZapper,
             functionName: "closeTroveToRawETH",
             args: [BigInt(loan.troveId)],
@@ -188,6 +194,8 @@ export const closeLoanPosition: FlowDeclaration<CloseLoanPositionRequest> = {
         // repay with collateral => get ETH
         if (coll.symbol === "ETH") {
           return ctx.writeContract({
+            // *** TODO ***
+            // MUST FIX. Zappers are broken for now
             ...coll.contracts.LeverageWETHZapper,
             functionName: "closeTroveFromCollateral",
             args: [BigInt(loan.troveId), closeFlashLoanAmount],
@@ -196,6 +204,8 @@ export const closeLoanPosition: FlowDeclaration<CloseLoanPositionRequest> = {
 
         // repay with collateral => get LST
         return ctx.writeContract({
+          // *** TODO ***
+          // MUST FIX. Zappers are broken for now
           ...coll.contracts.LeverageLSTZapper,
           functionName: "closeTroveFromCollateral",
           args: [BigInt(loan.troveId), closeFlashLoanAmount],
@@ -236,6 +246,8 @@ export const closeLoanPosition: FlowDeclaration<CloseLoanPositionRequest> = {
       throw new Error("Invalid collateral index: " + loan.collIndex);
     }
 
+    // *** TODO ***
+    // MUST FIX. Zappers are broken for now
     const Zapper =
       coll.symbol === "ETH"
         ? coll.contracts.LeverageWETHZapper

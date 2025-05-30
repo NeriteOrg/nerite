@@ -203,6 +203,8 @@ export const openBorrowPosition: FlowDeclaration<OpenBorrowPositionRequest> = {
         if (!collateral) {
           throw new Error(`Invalid collateral index: ${ctx.request.collIndex}`);
         }
+        // *** TODO ***
+        // MUST FIX. LeverageLSTZapper is broken for now
         const { LeverageLSTZapper, CollToken } = collateral.contracts;
 
         return ctx.writeContract({
@@ -240,6 +242,8 @@ export const openBorrowPosition: FlowDeclaration<OpenBorrowPositionRequest> = {
         });
 
         return ctx.writeContract({
+          // *** TODO ***
+          // MUST FIX. LeverageLSTZapper is broken for now
           ...collateral.contracts.LeverageLSTZapper,
           functionName: "openTroveWithRawETH" as const,
           args: [
@@ -325,6 +329,8 @@ export const openBorrowPosition: FlowDeclaration<OpenBorrowPositionRequest> = {
         });
 
         return ctx.writeContract({
+          // *** TODO ***
+          // MUST FIX. LeverageWETHZapper is broken for now
           ...collateral.contracts.LeverageWETHZapper,
           functionName: "openTroveWithRawETH",
           args: [
@@ -367,6 +373,9 @@ export const openBorrowPosition: FlowDeclaration<OpenBorrowPositionRequest> = {
     if (!collateral) {
       throw new Error(`Invalid collateral index: ${ctx.request.collIndex}`);
     }
+
+    // *** TODO ***
+    // MUST FIX. Zappers are broken for now
     const { LeverageLSTZapper, CollToken } = collateral.contracts;
 
     // ETH collateral doesn't need approval
