@@ -51,8 +51,7 @@ abstract contract TokenPriceFeedBase is Ownable {
         tokenUsdOracle.stalenessThreshold = _tokenUsdStalenessThreshold;
         tokenUsdOracle.decimals = tokenUsdOracle.aggregator.decimals();
 
-        // assertion to work chainlink or api3
-        assert(tokenUsdOracle.decimals == 8 || tokenUsdOracle.decimals == 18);
+        assert(tokenUsdOracle.decimals == 8);
     }
 
     // TODO: remove this and set address in constructor, since we'll use CREATE2
