@@ -750,10 +750,10 @@ contract InterestBatchManagementTest is DevTestSetup {
         assertEq(sortedTroves.contains(ATroveId), true, "SortedTroves should have trove A ");
         assertEq(sortedTroves.isBatchedNode(ATroveId), true, "A should be batched in SortedTroves");
 
-        // redeem from A
-        redeem(A, 500e18);
+        // redeem from A reddem to min debt amount - 10 eth to ensure trove is a zombie 
+        redeem(A, 1510e18);
 
-        // Check A is zombie
+        // Check A is zombie 
         assertEq(uint8(troveManager.getTroveStatus(ATroveId)), uint8(ITroveManager.Status.zombie));
 
         // Fast-forward time
