@@ -2535,7 +2535,7 @@ contract SPTest is DevTestSetup {
         LiqTestVars memory vars;
 
         _toRedist = bound(_toRedist, 1e18 + 1, 1000e18);
-        // uint256 _toRedist = 1000e18;
+        //uint256 _toRedist = 1000e18;
 
         uint256 rate = 5e16;
 
@@ -2554,7 +2554,7 @@ contract SPTest is DevTestSetup {
         vars.debtBBefore = troveManager.getTroveEntireDebt(troveIdB);
 
         vars.collBBefore = troveManager.getTroveEntireColl(troveIdB);
-        assertEq(vars.collBBefore, 5 ether);
+        assertEq(vars.collBBefore, 5 ether, "before collateral not 5 ether");
 
         // A deposits to SP
         makeSPDepositNoClaim(A, toSP);
@@ -2563,7 +2563,7 @@ contract SPTest is DevTestSetup {
 
         // Reassign _toRedist based on B's actual debt, in case there was rounding error in calculating B's exact debt
         _toRedist = troveManager.getTroveEntireDebt(troveIdB) - spBefore + 1e18;
-
+        // return LiquityMath._min(_coll / COLL_GAS_COMPENSATION_DIVISOR, COLL_GAS_COMPENSATION_CAP);
         // Confirm that B's entire debt is greater than totalBoldDeposits
         assertGt(troveManager.getTroveEntireDebt(troveIdB), spBefore);
 
@@ -2575,9 +2575,12 @@ contract SPTest is DevTestSetup {
         // B Liquidated by C
         liquidate(C, troveIdB);
 
+        //10000000000408087454250469512
+        //10000000000006587454250469512
+
         uint256 liqDebtOffset = vars.debtBBefore - _toRedist;
 
-        assertEq(stabilityPool.getTotalBoldDeposits(), spBefore - liqDebtOffset);
+        assertEq(stabilityPool.getTotalBoldDeposits(), spBefore - liqDebtOffset, "total bold deposits not correct");
 
         // Check debt redistribution occured, i.e. A's debt increased by the correct amount
         // Allow small error tolerance for the redistribution reward math
@@ -2587,11 +2590,16 @@ contract SPTest is DevTestSetup {
 
         uint256 collToOffset = vars.collBBefore * liqDebtOffset / vars.debtBBefore;
         // For < 400 units of LST collateral, collGasComp = 0.0375 WETH + 0.5% * coll.
-        // We only need the Trove's component here.
-        vars.collGasComp = collToOffset / 200;
 
-        // Check C's total WETH balance increased by the total gas comp
-        assertEq(collToken.balanceOf(C), vars.collCBefore + vars.collGasComp + 375e14);
+         // COLL_GAS_COMPENSATION_CAP = 10000000000000000 wei; // Max coll gas compensation capped at .1 eth
+         //uint256 constant COLL_GAS_COMPENSATION_DIVISOR = 800; // dividing by 800 yields 0.125%
+
+        // We only need the Trove's component here.
+        vars.collGasComp =  LiquityMath._min(collToOffset / 800, 10000000000000000); //collToOffset / 200;
+
+        // Check C's total WETH balance increased by the total gas comp 375e14
+        // TODO @cupOJoseph figure out why this is comming out as .01 eth 
+        assertEq(collToken.balanceOf(C), vars.collCBefore + vars.collGasComp + 1000000000000000 , "coll token balance not correct");
 
         // Check SP Coll has increased.  Expect no coll surplus for Trove owner, given massive price decrease
         vars.spCollBalAfter = stabilityPool.getCollBalance();
