@@ -3,10 +3,11 @@
 pragma solidity ^0.8.18;
 
 import "./TestContracts/DevTestSetup.sol";
+import "../src/Dependencies/Constants.sol";
 
 uint256 constant MAX_INT = 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff;
 
-contract LiquidationsLSTTest is DevTestSetup {
+contract LiquidationsLSTTest is DevTestSetup, Constants {
     function setUp() public override {
         // Start tests at a non-zero timestamp
         vm.warp(block.timestamp + 600);
@@ -136,7 +137,7 @@ contract LiquidationsLSTTest is DevTestSetup {
             troveManager.getTroveEntireColl(BTroveId) - initialValues.BColl,
             LiquityMath._min(
                 collAmount, //no gas comp
-                (liquidationAmount + initialValues.AInterest) * DECIMAL_PRECISION / price * 110 / 100 // debt with penalty
+                (liquidationAmount + initialValues.AInterest) * DECIMAL_PRECISION / price * (DECIMAL_PRECISION + LIQUIDATION_PENALTY_REDISTRIBUTION_WETH) / DECIMAL_PRECISION // debt with penalty
             ),
             10,
             "B trove coll mismatch"
@@ -145,7 +146,7 @@ contract LiquidationsLSTTest is DevTestSetup {
         // Check A retains ~10% of the collateral (after claiming from CollSurplus)
         // collAmount - (liquidationAmount to Coll + 10%)
         uint256 collSurplusAmount =
-            collAmount - (liquidationAmount + initialValues.AInterest) * DECIMAL_PRECISION / price * 110 / 100;        assertApproxEqAbs(
+            collAmount - (liquidationAmount + initialValues.AInterest) * DECIMAL_PRECISION / price * (DECIMAL_PRECISION + LIQUIDATION_PENALTY_REDISTRIBUTION_WETH) / DECIMAL_PRECISION;        assertApproxEqAbs(
             collToken.balanceOf(address(collSurplusPool)),
             collSurplusAmount,
             10,
@@ -256,8 +257,8 @@ contract LiquidationsLSTTest is DevTestSetup {
         FinalValues memory finalValues;
         // Offset part
         uint256 collToOffset = collAmount * _spAmount / (liquidationAmount + AInterest);
-        finalValues.collSPPortion = collToOffset * 995 / 1000;
-        finalValues.collPenaltySP = _spAmount * DECIMAL_PRECISION / _finalPrice * 105 / 100;
+        finalValues.collSPPortion = collToOffset * (DECIMAL_PRECISION - LIQUIDATION_PENALTY_SP_WETH) / DECIMAL_PRECISION;
+        finalValues.collPenaltySP = _spAmount * DECIMAL_PRECISION / _finalPrice * (DECIMAL_PRECISION + LIQUIDATION_PENALTY_SP_WETH) / DECIMAL_PRECISION;
         finalValues.collToSendToSP = LiquityMath._min(finalValues.collPenaltySP, finalValues.collSPPortion);
         // Check SP Bold has decreased
         finalValues.spBoldBalance = stabilityPool.getTotalBoldDeposits();
@@ -267,7 +268,7 @@ contract LiquidationsLSTTest is DevTestSetup {
         // liquidationAmount to Coll + 5%
         assertApproxEqAbs(
             finalValues.spCollBalance - initialValues.spCollBalance,
-            finalValues.collToSendToSP,
+            finalValues.collToSendToSP ,
             1000,
             "SP Coll balance mismatch"
         );
@@ -275,7 +276,7 @@ contract LiquidationsLSTTest is DevTestSetup {
         // Redistribution part
         finalValues.collRedistributionPortion = collAmount - collToOffset;
         finalValues.collPenaltyRedistribution =
-            (liquidationAmount - _spAmount + AInterest) * DECIMAL_PRECISION / _finalPrice * 110 / 100;
+            (liquidationAmount - _spAmount + AInterest) * DECIMAL_PRECISION / _finalPrice * (DECIMAL_PRECISION + LIQUIDATION_PENALTY_REDISTRIBUTION_WETH) / DECIMAL_PRECISION;
        
         finalValues.collToLiquidate = finalValues.collSPPortion + finalValues.collRedistributionPortion;
        
