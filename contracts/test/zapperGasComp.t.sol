@@ -832,11 +832,12 @@ contract ZapperGasCompTest is DevTestSetup {
         uint256 collBalanceBefore = collToken.balanceOf(A);
         uint256 boldDebtBefore = troveManager.getTroveEntireDebt(troveId);
 
-        // Adjust trove: remove 1 ETH and try to repay 9k (only will repay ~8k, up to MIN_DEBT)
+        // Adjust trove: remove 1 ETH and try to repay 9.6k (only will repay ~8k, up to MIN_DEBT)
         vm.startPrank(A);
         boldToken.approve(address(gasCompZapper), type(uint256).max);
-        gasCompZapper.adjustTrove(troveId, 1 ether, false, 9000e18, false, 0);
+        gasCompZapper.adjustTrove(troveId, 1 ether, false, 9600e18, false, 0);
         vm.stopPrank();
+
 
         assertEq(boldToken.balanceOf(A), boldAmount + MIN_DEBT - boldDebtBefore, "BOLD bal mismatch");
         assertEq(boldToken.balanceOf(address(gasCompZapper)), 0, "Zapper BOLD bal should be zero");
@@ -874,7 +875,7 @@ contract ZapperGasCompTest is DevTestSetup {
         // Adjust trove: try to repay 9k (only will repay ~8k, up to MIN_DEBT)
         vm.startPrank(A);
         boldToken.approve(address(gasCompZapper), type(uint256).max);
-        gasCompZapper.repayBold(troveId, 9000e18);
+        gasCompZapper.repayBold(troveId, 9600e18);
         vm.stopPrank();
 
         assertEq(boldToken.balanceOf(A), boldAmount + MIN_DEBT - boldDebtBefore, "BOLD bal mismatch");

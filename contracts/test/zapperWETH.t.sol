@@ -5,8 +5,10 @@ pragma solidity ^0.8.18;
 import "./TestContracts/DevTestSetup.sol";
 import "./TestContracts/WETH.sol";
 import "src/Zappers/WETHZapper.sol";
+import "src/Dependencies/Constants.sol";
+import "forge-std/console.sol";
 
-contract ZapperWETHTest is DevTestSetup {
+contract ZapperWETHTest is DevTestSetup, Constants {
     function setUp() public override {
         // Start tests at a non-zero timestamp
         vm.warp(block.timestamp + 600);
@@ -868,6 +870,7 @@ contract ZapperWETHTest is DevTestSetup {
             removeManager: address(0),
             receiver: address(0)
         });
+
         vm.startPrank(A);
         uint256 troveId = wethZapper.openTroveWithRawETH{value: ethAmount + ETH_GAS_COMPENSATION}(params);
         vm.stopPrank();
@@ -876,10 +879,10 @@ contract ZapperWETHTest is DevTestSetup {
         uint256 collBalanceBefore = WETH.balanceOf(A);
         uint256 boldDebtBefore = troveManager.getTroveEntireDebt(troveId);
 
-        // Adjust trove: remove 1 ETH and try to repay 9k (only will repay ~8k, up to MIN_DEBT)
+        // Adjust trove: remove 1 ETH and try to repay 9.6k (only will repay ~8k, up to MIN_DEBT)
         vm.startPrank(A);
         boldToken.approve(address(wethZapper), type(uint256).max);
-        wethZapper.adjustTroveWithRawETH(troveId, 1 ether, false, 9000e18, false, 0);
+        wethZapper.adjustTroveWithRawETH(troveId, 1 ether, false, 9600e18, false, 0);
         vm.stopPrank();
 
         assertEq(boldToken.balanceOf(A), boldAmount + MIN_DEBT - boldDebtBefore, "BOLD bal mismatch");
@@ -918,7 +921,7 @@ contract ZapperWETHTest is DevTestSetup {
         // Adjust trove: try to repay 9k (only will repay ~8k, up to MIN_DEBT)
         vm.startPrank(A);
         boldToken.approve(address(wethZapper), type(uint256).max);
-        wethZapper.repayBold(troveId, 9000e18);
+        wethZapper.repayBold(troveId, 9600e18);
         vm.stopPrank();
 
         assertEq(boldToken.balanceOf(A), boldAmount + MIN_DEBT - boldDebtBefore, "BOLD bal mismatch");
