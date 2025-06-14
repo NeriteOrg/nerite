@@ -3,8 +3,9 @@
 pragma solidity ^0.8.18;
 
 import "./TestContracts/DevTestSetup.sol";
+import "src/Dependencies/Constants.sol";
 
-contract LiquidationsTest is DevTestSetup {
+contract LiquidationsTest is DevTestSetup, Constants {
     struct LiquidationsTestVars {
         uint256 liquidationAmount;
         uint256 collAmount;
@@ -198,7 +199,7 @@ contract LiquidationsTest is DevTestSetup {
             finalSPCollBalance - initialSPCollBalance, collAmount * 995 / 1000, 10, "SP Coll balance mismatch"
         );
 
-        // Check there’s no surplus
+        // Check there's no surplus
         assertEq(collToken.balanceOf(address(collSurplusPool)), 0, "CollSurplusPool should be empty");
         assertEq(
             collToken.balanceOf(address(collSurplusPool)),
@@ -405,14 +406,17 @@ contract LiquidationsTest is DevTestSetup {
 
         // Check A retains ~4.5% of the collateral (after claiming from CollSurplus)
         // vars.collAmount - 0.5% (of offset) - (vars.liquidationAmount to Coll + 5% / 10%)
-        uint256 collSurplusAmount =
-        // Portion offset
-        vars.collAmount * (vars.liquidationAmount / 2 - 1e18) / (vars.liquidationAmount + vars.AInterest) * 995 / 1000
-            - (vars.liquidationAmount / 2 - 1e18) * DECIMAL_PRECISION / vars.price * 105 / 100
-        // Portion redistributed
-        + vars.collAmount * (vars.liquidationAmount / 2 + 1e18 + vars.AInterest)
-            / (vars.liquidationAmount + vars.AInterest)
-            - (vars.liquidationAmount / 2 + 1e18 + vars.AInterest) * DECIMAL_PRECISION / vars.price * 110 / 100;
+    uint256 collSurplusAmount =
+    // Portion offset
+    vars.collAmount * (vars.liquidationAmount / 2 - MIN_BOLD_IN_SP) / (vars.liquidationAmount + vars.AInterest) 
+    * (DECIMAL_PRECISION - DECIMAL_PRECISION / COLL_GAS_COMPENSATION_DIVISOR) / DECIMAL_PRECISION
+    - (vars.liquidationAmount / 2 - MIN_BOLD_IN_SP) * DECIMAL_PRECISION / vars.price * (DECIMAL_PRECISION + MIN_LIQUIDATION_PENALTY_SP) / DECIMAL_PRECISION
+    // Portion redistributed
+    + vars.collAmount * (vars.liquidationAmount / 2 + MIN_BOLD_IN_SP + vars.AInterest)
+        / (vars.liquidationAmount + vars.AInterest)
+        - (vars.liquidationAmount / 2 + MIN_BOLD_IN_SP + vars.AInterest) * DECIMAL_PRECISION / vars.price 
+        * (DECIMAL_PRECISION + LIQUIDATION_PENALTY_REDISTRIBUTION_WETH) / DECIMAL_PRECISION;
+
         assertApproxEqAbs(
             collToken.balanceOf(address(collSurplusPool)),
             collSurplusAmount,
