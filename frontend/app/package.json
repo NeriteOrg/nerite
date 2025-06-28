@@ -5,6 +5,9 @@
   "license": "MIT",
   "version": "1.0.0",
   "type": "module",
+  "engines": {
+    "node": ">=20.11.1"
+  },
   "scripts": {
     "build": "pnpm build-deps && next build",
     "build-analyze": "ANALYZE=true pnpm build",
