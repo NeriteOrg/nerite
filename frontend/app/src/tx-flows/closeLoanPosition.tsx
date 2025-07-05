@@ -15,7 +15,7 @@ import { vPositionLoanCommited } from "@/src/valibot-utils";
 import * as dn from "dnum";
 import * as v from "valibot";
 import { maxUint256 } from "viem";
-import { readContract } from "wagmi/actions";
+import { multicall, readContract, simulateContract } from "wagmi/actions";
 import { createRequestSchema, verifyTransaction } from "./shared";
 
 const RequestSchema = createRequestSchema("closeLoanPosition", {
@@ -74,7 +74,7 @@ export const closeLoanPosition: FlowDeclaration<CloseLoanPositionRequest> = {
               <Amount
                 key='start'
                 value={amountToRepay}
-                suffix={` ${repayWithCollateral ? collateral.symbol : "USDN"}`}
+                suffix={` ${repayWithCollateral ? collateral.symbol : "USND"}`}
               />,
             ]}
           />
@@ -106,7 +106,7 @@ export const closeLoanPosition: FlowDeclaration<CloseLoanPositionRequest> = {
 
   steps: {
     approveBold: {
-      name: () => "Approve USDN",
+      name: () => "Approve USND",
       Status: (props) => (
         <TransactionStatus {...props} approval='approve-only' />
       ),
@@ -116,11 +116,32 @@ export const closeLoanPosition: FlowDeclaration<CloseLoanPositionRequest> = {
         if (!coll) {
           throw new Error("Invalid collateral index: " + loan.collIndex);
         }
-        const { entireDebt } = await readContract(ctx.wagmiConfig, {
+        const latestTroveData = await readContract(ctx.wagmiConfig, {
           ...coll.contracts.TroveManager,
           functionName: "getLatestTroveData",
           args: [BigInt(loan.troveId)],
         });
+        const interestBatchManager = await readContract(ctx.wagmiConfig, {
+          ...coll.contracts.BorrowerOperations,
+          functionName: "interestBatchManagerOf",
+          args: [BigInt(loan.troveId)],
+        });
+        const latestBatchData = await readContract(ctx.wagmiConfig, {
+          ...coll.contracts.TroveManager,
+          functionName: "getLatestBatchData",
+          args: [interestBatchManager],
+        });
+        const aggWeightedDebtSum = await readContract(ctx.wagmiConfig, {
+          ...coll.contracts.ActivePool,
+          functionName: "aggWeightedDebtSum",
+        });
+        const removeManagerReceiver = await readContract(ctx.wagmiConfig, {
+          ...coll.contracts.BorrowerOperations,
+          functionName: "removeManagerReceiverOf",
+          args: [BigInt(loan.troveId)],
+        });
+        console.log({latestTroveData, latestBatchData, interestBatchManager, aggWeightedDebtSum, aggWeightedDebtDiff: aggWeightedDebtSum - latestTroveData.weightedRecordedDebt, removeManagerReceiver});
+        const { entireDebt } = latestTroveData;
 
         const Zapper =
           coll.symbol === "ETH"
@@ -132,6 +153,7 @@ export const closeLoanPosition: FlowDeclaration<CloseLoanPositionRequest> = {
           functionName: "approve",
           args: [
             Zapper.address,
+            // coll.contracts.BorrowerOperations.address,
             ctx.preferredApproveMethod === "approve-infinite"
               ? maxUint256 // infinite approval
               : dn.mul([entireDebt, 18], 1.1)[0], // exact amount (TODO: better estimate)
@@ -143,7 +165,7 @@ export const closeLoanPosition: FlowDeclaration<CloseLoanPositionRequest> = {
       },
     },
 
-    // Close a loan position, repaying with USDN or with the collateral
+    // Close a loan position, repaying with USND or with the collateral
     closeLoanPosition: {
       name: () => "Close loan",
       Status: TransactionStatus,
@@ -155,16 +177,71 @@ export const closeLoanPosition: FlowDeclaration<CloseLoanPositionRequest> = {
           throw new Error("Invalid collateral index: " + loan.collIndex);
         }
 
-        // repay with USDN => get ETH
+        // repay with USND => get ETH
         if (!ctx.request.repayWithCollateral && coll.symbol === "ETH") {
+          const calls = await multicall(ctx.wagmiConfig, {
+            contracts: [
+              {
+                ...coll.contracts.TroveManager,
+                functionName: "getLatestTroveData",
+                args: [BigInt(loan.troveId)],
+              },
+              {
+                ...coll.contracts.TroveManager,
+                functionName: "getEntireBranchDebt",
+              },
+              {
+                ...coll.contracts.TroveManager,
+                functionName: "getEntireBranchColl",
+              },
+              {
+                ...coll.contracts.PriceFeed,
+                functionName: "fetchPrice",
+              },
+              {
+                ...coll.contracts.BorrowerOperations,
+                functionName: "CCR"
+              }
+            ]
+          })
+          function _computeCR(totalColl: bigint, totalDebt: bigint, price: bigint) {
+            if (totalDebt > 0n) {
+              return totalColl * price / totalDebt;
+            }
+            return 2n ** 256n - 1n;
+          }
+          const newTotalDebt = calls[1]?.result! - calls[0]?.result!.entireDebt;
+          const newTotalColl = calls[2]?.result! - calls[0]?.result!.entireColl;
+          const newCR = _computeCR(newTotalColl, newTotalDebt, calls[3]?.result![0]);
+          console.log({
+            latestTroveData: calls[0]?.result,
+            totalDebt: calls[1]?.result,
+            totalColl: calls[2]?.result,
+            newTotalDebt,
+            newTotalColl,
+            newCR,
+            CCR: calls[4]?.result,
+            NewTCRisAboveCCR: newCR >= calls[4]?.result!,
+          });
+          const simulation = await simulateContract(ctx.wagmiConfig, {
+            ...coll.contracts.LeverageWETHZapper,
+            functionName: "closeTroveToRawETH",
+            args: [BigInt(loan.troveId)],
+          });
+          console.log("Simulation:", simulation);
           return ctx.writeContract({
             ...coll.contracts.LeverageWETHZapper,
             functionName: "closeTroveToRawETH",
             args: [BigInt(loan.troveId)],
           });
+          // return ctx.writeContract({
+          //   ...coll.contracts.BorrowerOperations,
+          //   functionName: "closeTrove",
+          //   args: [BigInt(loan.troveId)],
+          // });
         }
 
-        // repay with USDN => get LST
+        // repay with USND => get LST
         if (!ctx.request.repayWithCollateral) {
           return ctx.writeContract({
             ...coll.contracts.LeverageLSTZapper,

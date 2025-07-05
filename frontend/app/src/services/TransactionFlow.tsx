@@ -539,7 +539,8 @@ function useFlowManager(account: Address | null, isSafe: boolean = false) {
           artifact,
           error: null,
         });
-      } catch (error) {
+      } catch (error: any) {
+        console.error({...error});
         updateFlowStep(stepIndex, {
           status: "error",
           artifact: currentArtifact,

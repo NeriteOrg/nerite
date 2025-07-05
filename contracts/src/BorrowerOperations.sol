@@ -702,7 +702,17 @@ contract BorrowerOperations is LiquityBase, AddRemoveManagers, IBorrowerOperatio
         }
 
         (uint256 price,) = priceFeed.fetchPrice();
-        uint256 newTCR = _getNewTCRFromTroveChange(troveChange, price);
+        // Previous implementation:
+        // uint256 newTCR = _getNewTCRFromTroveChange(troveChange, price);
+        
+        // Proposed implementation:
+        // NOTE: This is to account for the case when there is only one trove in the system.
+        uint256 newTCR;
+        if (troveManagerCached.getTroveIdsCount() > 1) {
+            newTCR = _getNewTCRFromTroveChange(troveChange, price);
+        } else {
+            newTCR = LiquityMath._computeCR(0, 0, price);
+        }
         if (!hasBeenShutDown) _requireNewTCRisAboveCCR(newTCR);
 
         troveManagerCached.onCloseTrove(
