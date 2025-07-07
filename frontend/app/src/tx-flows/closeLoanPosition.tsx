@@ -134,7 +134,7 @@ export const closeLoanPosition: FlowDeclaration<CloseLoanPositionRequest> = {
             Zapper.address,
             ctx.preferredApproveMethod === "approve-infinite"
               ? maxUint256 // infinite approval
-              : dn.mul([entireDebt, 18], 1.1)[0], // exact amount (TODO: better estimate)
+              : dn.mul([entireDebt, 18], 1.01)[0], // exact amount (TODO: better estimate)
           ],
         });
       },

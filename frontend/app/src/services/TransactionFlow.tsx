@@ -97,6 +97,10 @@ import {
   updateLoanInterestRate,
   type UpdateLoanInterestRateRequest,
 } from "@/src/tx-flows/updateLoanInterestRate";
+import {
+  redeemCollateral,
+  type RedeemCollateralRequest,
+} from "@/src/tx-flows/redeemCollateral";
 
 export type FlowRequestMap = {
   allocateVotingPower: AllocateVotingPowerRequest;
@@ -113,6 +117,7 @@ export type FlowRequestMap = {
   updateBorrowPosition: UpdateBorrowPositionRequest;
   updateLeveragePosition: UpdateLeveragePositionRequest;
   updateLoanInterestRate: UpdateLoanInterestRateRequest;
+  redeemCollateral: RedeemCollateralRequest;
 };
 
 const FlowIdSchema = v.union([
@@ -130,6 +135,7 @@ const FlowIdSchema = v.union([
   v.literal("updateBorrowPosition"),
   v.literal("updateLeveragePosition"),
   v.literal("updateLoanInterestRate"),
+  v.literal("redeemCollateral"),
 ]);
 
 export const flows: FlowsMap = {
@@ -147,6 +153,7 @@ export const flows: FlowsMap = {
   updateBorrowPosition,
   updateLeveragePosition,
   updateLoanInterestRate,
+  redeemCollateral,
 };
 
 /* end of flows registration */

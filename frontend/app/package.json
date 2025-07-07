@@ -40,8 +40,8 @@
     "sharp": "^0.33.5",
     "ts-pattern": "^5.6.0",
     "valibot": "^0.42.1",
-    "viem": "^2.22.8",
-    "wagmi": "^2.14.7"
+    "viem": "^2.30.0",
+    "wagmi": "^2.15.4"
   },
   "devDependencies": {
     "@babel/plugin-transform-private-methods": "^7.25.9",
