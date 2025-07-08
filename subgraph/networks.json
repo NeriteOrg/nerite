@@ -1,8 +1,8 @@
 {
   "arbitrum-one": {
     "BoldToken": {
-      "address": "0x285d8ffa57b54ad387c971b189f927ead5ac0221",
-      "startBlock": 350400460
+      "address": "0xce0b686e0aab25132937cf176f44acce110ccd7f",
+      "startBlock": 355606399
     },
     "Governance": {
       "address": "0x108f48E558078C8eF2eb428E0774d7eCd01F6B1d",
