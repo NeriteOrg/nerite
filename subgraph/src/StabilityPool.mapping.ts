@@ -10,6 +10,7 @@ import {
   DepositOperation as DepositOperationEvent,
   DepositUpdated as DepositUpdatedEvent,
   S_Updated as S_UpdatedEvent,
+  ScaleUpdated as ScaleUpdatedEvent,
   StabilityPoolCollBalanceUpdated as StabilityPoolCollBalanceUpdatedEvent,
   StabilityPoolBoldBalanceUpdated as StabilityPoolBoldBalanceUpdatedEvent,
 } from "../generated/templates/StabilityPool/StabilityPool";
@@ -56,6 +57,14 @@ export function handleBUpdated(event: B_UpdatedEvent): void {
     event.params._scale,
   );
   spEpochScale.B = event.params._B;
+  spEpochScale.save();
+}
+
+export function handleScaleUpdated(event: ScaleUpdatedEvent): void {
+  let spEpochScale = loadOrCreateStabilityPoolScale(
+    // event.params._epoch,
+    event.params._currentScale,
+  );
   spEpochScale.save();
 }
 
