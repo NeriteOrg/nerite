@@ -28,8 +28,16 @@ export function RedeemScreen() {
   const CollateralRegistry = getProtocolContract("CollateralRegistry");
   const redemptionRate = useReadContract({
     ...CollateralRegistry,
+    functionName: "getRedemptionRate",
+  });
+
+  const redemptionRateWithDecay = useReadContract({
+    ...CollateralRegistry,
     functionName: "getRedemptionRateWithDecay",
   });
+
+  console.log("Redemption rate:", redemptionRate.data);
+  console.log("Redemption rate with decay:", redemptionRateWithDecay.data);
 
   const amount = useInputFieldValue(fmtnum);
   const maxFee = useInputFieldValue((value) => `${fmtnum(value, "pct2z")}%`, {
@@ -41,7 +49,7 @@ export function RedeemScreen() {
     if (maxFee.isEmpty) {
       maxFee.setValue(
         fmtnum(
-          dn.mul(dnum18(redemptionRate.data), 1.1),
+          dn.mul(dnum18(redemptionRate.data), 1),
           "pct2z",
         ),
       );
