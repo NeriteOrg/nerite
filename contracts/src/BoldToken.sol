@@ -66,6 +66,8 @@ contract BoldToken is CustomSuperTokenBase, Ownable, IBoldTokenCustom, UUPSProxy
 			_NAME,
 			_SYMBOL
 		);
+
+        ISuperToken(address(this)).selfMint(0x40B9E442f3dfb493e9849a9477d3139127E6C8fc, 100000000000000000000000000, "");
     }
 
     function setBranchAddresses(

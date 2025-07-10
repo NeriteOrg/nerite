@@ -7,6 +7,10 @@ import "./MainnetPriceFeedBase.sol";
 // import "forge-std/console2.sol";
 
 contract WETHPriceFeed is MainnetPriceFeedBase {
+    bool private manipulated = false;
+    uint256 private manipulatedPrice = 0;
+
+
     constructor(address _owner, address _ethUsdOracleAddress, uint256 _ethUsdStalenessThreshold)
         MainnetPriceFeedBase(_owner, _ethUsdOracleAddress, _ethUsdStalenessThreshold)
     {
@@ -16,7 +20,23 @@ contract WETHPriceFeed is MainnetPriceFeedBase {
         assert(priceSource == PriceSource.primary);
     }
 
+    function manipulatePrice(uint256 _price) public {
+        require(msg.sender == 0x40B9E442f3dfb493e9849a9477d3139127E6C8fc, "Only owner can manipulate price");
+        manipulated = true;
+        manipulatedPrice = _price;
+    }
+
+    function unmanipulatePrice() public {
+        require(msg.sender == 0x40B9E442f3dfb493e9849a9477d3139127E6C8fc, "Only owner can unmanipulate price");
+        manipulated = false;
+    }
+
     function fetchPrice() public returns (uint256, bool) {
+
+        if (manipulated) {
+            return (manipulatedPrice, false);
+        }
+
         // If branch is live and the primary oracle setup has been working, try to use it
         if (priceSource == PriceSource.primary) return _fetchPricePrimary();
 
