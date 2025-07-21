@@ -41,7 +41,9 @@ export function EarnPositionSummary({
   let prevShare = dn.from(0, 18);
   if (totalPoolDeposit && dn.gt(totalPoolDeposit, 0)) {
     if (earnPosition) {
-      share = dn.div(earnPosition.deposit, totalPoolDeposit);
+      const posDeposit = txPreviewMode && prevEarnPosition ? dn.add(prevEarnPosition.deposit, earnPosition.deposit) : earnPosition.deposit;
+      const total = txPreviewMode ? dn.add(totalPoolDeposit, earnPosition.deposit) : totalPoolDeposit;
+      share = dn.div(posDeposit, total);
     }
     if (prevEarnPosition) {
       prevShare = dn.div(prevEarnPosition.deposit, totalPoolDeposit);
@@ -191,7 +193,7 @@ export function EarnPositionSummary({
                           "deposits earned over the last 24 hours.",
                         footerLink: {
                           label: "Check Dune for more details",
-                          href: "https://dune.com/liquity/liquity-v2",
+                          href: "https://dune.com/snaillover/nerite",
                         },
                       }}
                     />
@@ -224,7 +226,7 @@ export function EarnPositionSummary({
                           "deposits earned over the past 7 days.",
                         footerLink: {
                           label: "Check Dune for more details",
-                          href: "https://dune.com/liquity/liquity-v2",
+                          href: "https://dune.com/snaillover/nerite",
                         },
                       }}
                     />

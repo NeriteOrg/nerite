@@ -9,6 +9,7 @@ import type {
   PrefixedTroveId,
   TroveId,
 } from "@/src/types";
+import * as dn from "dnum";
 import type { Address, CollateralSymbol, CollateralToken } from "@liquity2/uikit";
 import type { UseQueryResult } from "@tanstack/react-query";
 import type { Config as WagmiConfig } from "wagmi";
@@ -31,7 +32,6 @@ import {
 import { isCollIndex, isTroveId } from "@/src/types";
 import { COLLATERALS, isAddress } from "@liquity2/uikit";
 import { useQuery } from "@tanstack/react-query";
-import * as dn from "dnum";
 import { useMemo } from "react";
 import * as v from "valibot";
 import { encodeAbiParameters, keccak256, parseAbiParameters } from "viem";
@@ -341,6 +341,43 @@ export function useEarnPositionsByAccount(account: null | Address) {
 //   };
 // }
 
+export function useTotalDebtCollateralPositions(collIndex: CollIndex | null) {
+  const activePool = getCollateralContract(collIndex, "ActivePool");
+  const priceFeed = getCollateralContract(collIndex, "PriceFeed");
+
+  const { data: totalDebt } = useReadContract({
+    ...activePool,
+    functionName: "getBoldDebt",
+    query: {
+      enabled: collIndex !== null,
+    },
+  });
+
+  const { data: totalCollateral } = useReadContract({
+    ...activePool,
+    functionName: "getCollBalance",
+    query: {
+      enabled: collIndex !== null,
+    },
+  });
+
+  const { data: priceData } = useReadContract({
+    ...priceFeed,
+    functionName: "fetchPrice",
+    query: {
+      enabled: collIndex !== null,
+    },
+  });
+  
+  const price = priceData ? (priceData as [bigint, boolean])[0] : null;
+  
+  return {
+    totalDebt: totalDebt ? dnum18(totalDebt as bigint) : null,
+    totalCollateral: totalCollateral ? dnum18(totalCollateral as bigint) : null,
+    totalCollateralInUsd: totalCollateral && price ? dn.mul(dnum18((totalCollateral as bigint)), dnum18(price)) : null,
+  };
+}
+
 export function useAccountVotingPower(account: Address | null, lqtyDiff: bigint = 0n) {
   const govUser = useGovernanceUser(account);
   const govStats = useGovernanceStats();
@@ -614,7 +651,7 @@ export function usePredictAdjustInterestRateUpfrontFee(
   });
 }
 
-// from https://github.com/liquity/usdn/blob/204a3dec54a0e8689120ca48faf4ece5cf8ccd22/README.md#example-opentrove-transaction-with-hints
+// from https://github.com/liquity/bold/blob/204a3dec54a0e8689120ca48faf4ece5cf8ccd22/README.md#example-opentrove-transaction-with-hints
 export async function getTroveOperationHints({
   wagmiConfig,
   contracts,
