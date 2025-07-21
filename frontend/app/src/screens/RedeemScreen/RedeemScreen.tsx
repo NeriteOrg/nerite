@@ -28,7 +28,7 @@ export function RedeemScreen() {
   const CollateralRegistry = getProtocolContract("CollateralRegistry");
   const redemptionRate = useReadContract({
     ...CollateralRegistry,
-    functionName: "getRedemptionRateWithDecay",
+    functionName: "getRedemptionRate",
   });
 
   console.log("Redemption rate:", redemptionRate.data);
