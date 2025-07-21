@@ -1,0 +1,84 @@
+name: Frontend CI
+
+# This workflow:
+# - Runs build verification for the frontend app
+# - Runs tests to ensure functionality works
+# - Runs linting to maintain code quality
+# - Triggers on PRs that modify frontend code
+
+defaults:
+  run:
+    working-directory: frontend/app
+
+env:
+  CI: true
+  FORCE_COLOR: true
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/frontend-ci.yml"
+      - "frontend/app/**"
+      - "frontend/uikit/**"
+      - "pnpm-lock.yaml"
+
+jobs:
+  frontend-ci:
+    name: Frontend CI
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Git checkout
+        uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v3.0.0
+        with:
+          version: 8
+
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: ".node-version"
+          cache: "pnpm"
+          cache-dependency-path: "pnpm-lock.yaml"
+
+      - name: Set up environment variables for build
+        run: |
+          # Create minimal .env.local for build to succeed
+          cat > .env.local << EOF
+          NEXT_PUBLIC_DEMO_MODE=true
+          NEXT_PUBLIC_CHAIN_ID=42161
+          NEXT_PUBLIC_CHAIN_NAME="Arbitrum One"
+          NEXT_PUBLIC_CHAIN_CURRENCY=Ether|ETH|18
+          NEXT_PUBLIC_CHAIN_RPC_URL=https://arb1.arbitrum.io/rpc
+          NEXT_PUBLIC_CHAIN_BLOCK_EXPLORER=Arbiscan|https://arbiscan.io
+          NEXT_PUBLIC_CHAIN_CONTRACT_MULTICALL=0xca11bde05977b3631167028862be2a173976ca11
+          NEXT_PUBLIC_DELEGATE_AUTO=0x0000000000000000000000000000000000000000
+          NEXT_PUBLIC_VERCEL_ANALYTICS=false
+          NEXT_PUBLIC_ACCOUNT_SCREEN=false
+          # Use placeholder for subgraph URL to enable demo mode fallback
+          NEXT_PUBLIC_SUBGRAPH_URL=https://api.studio.thegraph.com/query/placeholder/placeholder/version/latest
+          EOF
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build dependencies (skip GraphQL codegen in CI)
+        run: |
+          # Build UIKit first
+          pnpm build-uikit
+          # Create banner file if it doesn't exist
+          pnpm build-banner
+          # Build Panda CSS
+          pnpm build-panda
+          # Note: Skipping GraphQL codegen since generated files already exist
+
+      - name: Build application
+        run: pnpm next build
+
+      - name: Run tests
+        run: pnpm vitest run
+
+      - name: Run linting
+        run: pnpm lint
