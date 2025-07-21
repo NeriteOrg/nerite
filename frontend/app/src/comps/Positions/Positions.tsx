@@ -5,11 +5,15 @@ import { ActionCard } from "@/src/comps/ActionCard/ActionCard";
 import content from "@/src/content";
 import { ACCOUNT_POSITIONS } from "@/src/demo-mode";
 import { DEMO_MODE } from "@/src/env";
-import { useStakePosition } from "@/src/liquity-utils";
-import { useEarnPositionsByAccount, useLoansByAccount } from "@/src/subgraph-hooks";
+// import { useStakePosition } from "@/src/liquity-utils";
+import {
+  // useEarnPositionsByAccount,
+  useLoansByAccount,
+} from "@/src/subgraph-hooks";
+import { useEarnPositionsByAccount } from "@/src/liquity-utils";
 import { css } from "@/styled-system/css";
 import { a, useSpring, useTransition } from "@react-spring/web";
-import * as dn from "dnum";
+// import * as dn from "dnum";
 import { useEffect, useRef, useState } from "react";
 import { match, P } from "ts-pattern";
 import { NewPositionCard } from "./NewPositionCard";
@@ -24,13 +28,12 @@ export function Positions({
   address,
   columns,
   showNewPositionCard = true,
-  title = (mode) => (
+  title = (mode) =>
     mode === "loading"
       ? " "
       : mode === "positions"
       ? content.home.myPositionsTitle
-      : content.home.openPositionTitle
-  ),
+      : content.home.openPositionTitle,
 }: {
   address: null | Address;
   columns?: number;
@@ -39,29 +42,38 @@ export function Positions({
 }) {
   const loans = useLoansByAccount(address);
   const earnPositions = useEarnPositionsByAccount(address);
-  const stakePosition = useStakePosition(address);
+  // const stakePosition = useStakePosition(address);
 
   const isPositionsPending = Boolean(
-    address && (
-      loans.isPending
-      || earnPositions.isPending
-      || stakePosition.isPending
-    ),
+    address &&
+      (
+        loans.isPending 
+        || earnPositions.isPending 
+        // || stakePosition.isPending
+      )
   );
 
-  const positions = isPositionsPending ? [] : (
-    DEMO_MODE ? ACCOUNT_POSITIONS : [
-      ...loans.data ?? [],
-      ...earnPositions.data ?? [],
-      ...stakePosition.data && dn.gt(stakePosition.data.deposit, 0) ? [stakePosition.data] : [],
-    ]
-  );
+  const positions = isPositionsPending
+    ? []
+    : DEMO_MODE
+    ? ACCOUNT_POSITIONS
+    : [
+        ...(loans.data ?? []),
+        ...(earnPositions.data?.filter(pos => pos.collIndex !== null).map(pos => ({
+          ...pos,
+          collIndex: pos.collIndex!
+        })) ?? []),
+        // ...(stakePosition.data && dn.gt(stakePosition.data.deposit, 0)
+        //   ? [stakePosition.data]
+        //   : []),
+      ];
 
-  let mode: Mode = address && positions && positions.length > 0
-    ? "positions"
-    : isPositionsPending
-    ? "loading"
-    : "actions";
+  let mode: Mode =
+    address && positions && positions.length > 0
+      ? "positions"
+      : isPositionsPending
+      ? "loading"
+      : "actions";
 
   // preloading for 1 second, prevents flickering
   // since the account doesn’t reconnect instantly
@@ -89,6 +101,7 @@ export function Positions({
 }
 
 function PositionsGroup({
+  // columns = 4,
   columns = 3,
   mode,
   onTitleClick,
@@ -111,11 +124,11 @@ function PositionsGroup({
       let cards: Array<[number, ReactNode]> = [];
 
       if (showNewPositionCard) {
-        cards.push([positions.length ?? -1, <NewPositionCard key="new" />]);
+        cards.push([positions.length ?? -1, <NewPositionCard key='new' />]);
       }
 
       cards = cards.concat(
-        positions.map((position, index) => (
+        positions.map((position, index) =>
           match(position)
             .returnType<[number, ReactNode]>()
             .with({ type: P.union("borrow", "multiply") }, (p) => [
@@ -131,29 +144,35 @@ function PositionsGroup({
               <PositionCardStake key={index} {...p} />,
             ])
             .exhaustive()
-        )) ?? [],
+        ) ?? []
       );
 
       return cards;
     })
     .with("loading", () => [
-      [0, <PositionCard key="0" loading />],
-      [1, <PositionCard key="1" loading />],
-      [2, <PositionCard key="2" loading />],
+      [0, <PositionCard key='0' loading />],
+      [1, <PositionCard key='1' loading />],
+      [2, <PositionCard key='2' loading />],
+      // [3, <PositionCard key='3' loading />],
     ])
     .with("actions", () =>
       showNewPositionCard
         ? [
-          [0, <ActionCard key="0" type="borrow" />],
-          [1, <ActionCard key="1" type="multiply" />],
-          [2, <ActionCard key="2" type="earn" />],
-          [3, <ActionCard key="3" type="stake" />],
-        ]
-        : [])
+            // [0, <ActionCard key='0' type='borrow' />],
+            // [1, <ActionCard key='1' type='multiply' />],
+            // [2, <ActionCard key='2' type='earn' />],
+            // [3, <ActionCard key='3' type='buy' />],
+            [0, <ActionCard key='0' type='borrow' />],
+            [1, <ActionCard key='2' type='earn' />],
+            // [2, <ActionCard key='3' type='buy' />],
+          ]
+        : []
+    )
     .exhaustive();
 
   if (mode === "actions") {
-    columns = 4;
+    // columns = 4;
+    columns = 3;
   }
 
   const cardHeight = mode === "actions" ? 144 : 180;
