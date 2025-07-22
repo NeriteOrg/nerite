@@ -180,10 +180,11 @@ test("getLtv() works", () => {
 test("getLoanDetails() correctly calculates isUnderwater and isLiquidatable in leveraged positions", () => {
   const loan = (deposit: number, borrowed: number, collPrice: number) => (
     getLoanDetails(
+      "ETH",
       d(deposit),
       d(borrowed),
       d(0.05),
-      1.1, // 110% collateral = 90.9090…% max. LTV
+      1.1, // min collateral ratio (110%)
       d(collPrice),
     )
   );
