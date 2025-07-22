@@ -178,7 +178,7 @@ export function RedeemScreen() {
                         </>
                       ),
                       footerLink: {
-                        href: "https://dune.com/queries/4641717/7730245",
+                        href: "https://dune.com/queries/5516111",
                         label: "Redemption fee on Dune",
                       },
                     }}
@@ -228,7 +228,7 @@ export function RedeemScreen() {
             You will be charged a dynamic redemption fee (the more redemptions, the higher the fee). Trading BOLD on an
             exchange could be more favorable.{" "}
             <Link
-              href="https://docs.liquity.org/v2-faq/redemptions-and-delegation"
+              href="https://docs.nerite.org/docs/user-docs/redemption-and-delegation"
               target="_blank"
               rel="noopener noreferrer"
             >

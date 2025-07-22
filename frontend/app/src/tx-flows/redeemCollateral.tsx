@@ -3,7 +3,7 @@ import type { Address } from "@/src/types";
 
 import { Amount } from "@/src/comps/Amount/Amount";
 import { LOCAL_STORAGE_PREFIX } from "@/src/constants";
-import { getProtocolContract } from "@/src/contracts";
+import { getContracts, getProtocolContract } from "@/src/contracts";
 import { dnum18, jsonParseWithDnum, jsonStringifyWithDnum } from "@/src/dnum-utils";
 import { TransactionDetailsRow } from "@/src/screens/TransactionsScreen/TransactionsScreen";
 import { TransactionStatus } from "@/src/screens/TransactionsScreen/TransactionStatus";
@@ -12,7 +12,7 @@ import { useQuery } from "@tanstack/react-query";
 import * as dn from "dnum";
 import { Fragment } from "react";
 import * as v from "valibot";
-import { createPublicClient, erc20Abi } from "viem";
+import { createPublicClient } from "viem";
 import { http, useConfig as useWagmiConfig } from "wagmi";
 import { createRequestSchema, verifyTransaction } from "./shared";
 import { COLLATERAL_CONTRACTS } from "../env";
@@ -194,19 +194,21 @@ export function useSimulatedBalancesChange({
       const [rpcUrl] = chain.rpcUrls.default.http;
       const client = createPublicClient({ chain, transport: http(rpcUrl) });
 
-      const branchesBalanceCalls = COLLATERAL_CONTRACTS.map((branch) => ({
-        to: branch.contracts.COLL_TOKEN,
-        abi: erc20Abi,
-        functionName: "balanceOf" as const,
-        args: [account],
-      } as const));
+      const branchesBalanceCalls = getContracts().collaterals.map((branch) => ({
+        to: branch.contracts.CollToken.address,
+        abi: branch.contracts.CollToken.abi,
+        functionName: "balanceOf",
+        args: [account!],
+      }));
 
       const boldBalanceCall = {
         to: BoldToken.address,
         abi: BoldToken.abi,
-        functionName: "balanceOf" as const,
-        args: [account],
-      } as const;
+        functionName: "balanceOf",
+        args: [account!],
+      };
+
+      console.log("Start simulation");
 
       const simulation = await client.simulateCalls({
         account: account!,
@@ -231,6 +233,15 @@ export function useSimulatedBalancesChange({
         // This is needed to avoid a “nonce too low” error with certain RPCs
         stateOverrides: [{ address: account!, nonce: 0 }],
       });
+
+      console.log("simulation", simulation);
+
+      const error = simulation.results.find((result) => result.error)?.error;
+      if (error) {
+        const message = error.message ?? (error.cause as any).shortMessage ?? "Unknown error";
+        console.error(message);
+        throw new Error(message);
+      }
 
       const getBalancesFromSimulated = (position: number) => {
         return simulation.results
