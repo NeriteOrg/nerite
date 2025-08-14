@@ -6,6 +6,17 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { MenuItem } from "./MenuItem";
 
+export type MenuItemType =
+  | 'dashboard'
+  | 'borrow'
+  | 'multiply'
+  | 'earn'
+  | 'buy'
+  | 'stream'
+  // | 'stake';
+
+export type HrefTarget = '_self' | '_blank';
+
 export function Menu({
   menuItems,
 }: {
@@ -13,6 +24,8 @@ export function Menu({
     string,
     string,
     ComponentType<{}>,
+    MenuItemType,
+    HrefTarget
   ][];
 }) {
   const pathname = usePathname();
@@ -27,12 +40,14 @@ export function Menu({
           height: "100%",
         })}
       >
-        {menuItems.map(([label, href, Icon]) => {
+        {menuItems.map(([label, href, Icon, type, target]) => {
+          const external = href.startsWith("http");
           const selected = href === "/" ? pathname === "/" : pathname.startsWith(href);
           return (
             <li key={label + href}>
               <Link
                 href={href}
+                target={external ? target : undefined}
                 className={css({
                   display: "flex",
                   height: "100%",
@@ -47,7 +62,7 @@ export function Menu({
                 })}
                 style={{
                   color: token(
-                    `colors.${selected ? "selected" : "interactive"}`,
+                    `colors.${selected && !external ? "selected" : "interactive"}`,
                   ),
                 }}
               >
@@ -55,6 +70,7 @@ export function Menu({
                   icon={<Icon />}
                   label={label}
                   selected={selected}
+                  type={type}
                 />
               </Link>
             </li>

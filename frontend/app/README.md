@@ -1,28 +1,16 @@
-# Liquity V2 App
-
-## Preview
-
-<https://liquity2-sepolia.vercel.app/>
+# Nerite App
 
 ## Requirements
 
 - [Node.js](https://nodejs.org/) (v20 or later)
 - [pnpm](https://pnpm.io/) (v8)
 
-## Dependencies
-
-```sh
-git clone git@github.com:liquity/bold.git
-cd bold
-pnpm install # install dependencies for all packages
-```
-
 ## How to develop
 
-Copy the `.env` file to `.env.local`:
+Copy the `.env.example` file to `.env.local`:
 
 ```sh
-cp .env .env.local
+cp .env.example .env.local
 ```
 
 Edit the `.env.local` file to set the environment variables.
@@ -30,7 +18,7 @@ Edit the `.env.local` file to set the environment variables.
 Run the development server:
 
 ```sh
-cd bold/frontend/app
+cd nerite/frontend/app
 pnpm build-deps # only needed once
 pnpm dev
 ```
@@ -42,28 +30,26 @@ You can now open <http://localhost:3000/> in your browser.
 ```sh
 pnpm build                  # build the static app in out/
 pnpm build-deps             # build all the dependencies needed by the app
-pnpm build-graphql          # update the code generated from the GraphQL queries
+pnpm build-graphql          # generate TypeScript types from GraphQL queries (requires valid NEXT_PUBLIC_SUBGRAPH_URL)
 pnpm build-panda            # update the code generated from the Panda CSS config
 pnpm build-uikit            # builds the UI kit in ../uikit
 pnpm dev                    # run the development server
 pnpm fmt                    # format the code
 pnpm lint                   # lint the code
 pnpm test                   # run the tests
-pnpm update-liquity-abis    # build the contracts and update the ABIs
 ```
 
 ## Environment
 
-Create `.env.local` from the `.env` file and fill in the required values (see the description of each variable below).
+Create `.env.local` from the `.env.example` file and fill in the required values (see the description of each variable below).
 
 ```sh
-cp .env .env.local
+cp .env.example .env.local
 ```
 
 See [./src/env.ts](./src/env.ts) for details about how the environment variables are being imported by the app.
 
-<details>
-<summary>Supported Variables</summary>
+## Supported Variables
 
 ### `NEXT_PUBLIC_ACCOUNT_SCREEN`
 
@@ -74,63 +60,27 @@ Enable or disable the account screen (meant for testing purposes).
 NEXT_PUBLIC_ACCOUNT_SCREEN=false
 ```
 
-### `NEXT_PUBLIC_APP_COMMIT_URL`
-
-The URL template for linking to specific app commits in the repository. Set to `false` to disable.
-
-```dosini
-# Format
-NEXT_PUBLIC_APP_COMMIT_URL=https://url_template_with_{commit}
-
-# Example (default)
-NEXT_PUBLIC_APP_COMMIT_URL=https://github.com/liquity/bold/tree/{commit}
-```
-
-### `NEXT_PUBLIC_APP_VERSION_URL`
-
-The URL template for linking to specific app version releases. Set to `false` to disable.
-
-```dosini
-# Format
-NEXT_PUBLIC_APP_VERSION_URL=https://url_template_with_{version}
-
-# Example (default)
-NEXT_PUBLIC_APP_VERSION_URL=https://github.com/liquity/bold/releases/tag/%40liquity2%2Fapp-v{version}
-```
-
-### `NEXT_PUBLIC_CONTRACTS_COMMIT_URL`
-
-The URL template for linking to specific contract commits in the repository. Set to `false` to disable.
-
-```dosini
-# Format
-NEXT_PUBLIC_CONTRACTS_COMMIT_URL=https://url_template_with_{commit}
-
-# Example (default)
-NEXT_PUBLIC_CONTRACTS_COMMIT_URL=https://github.com/liquity/bold/tree/{commit}
-```
-
 ### `NEXT_PUBLIC_CHAIN_ID`
 
-The Ethereum network to connect to.
+The blockchain network chain ID to connect to.
 
 ```dosini
-# Example
-NEXT_PUBLIC_CHAIN_ID=1
+# Example (Arbitrum One)
+NEXT_PUBLIC_CHAIN_ID=42161
 ```
 
 ### `NEXT_PUBLIC_CHAIN_NAME`
 
-The name of the Ethereum network.
+The name of the blockchain network.
 
 ```dosini
 # Example
-NEXT_PUBLIC_CHAIN_NAME=Ethereum
+NEXT_PUBLIC_CHAIN_NAME=Arbitrum One
 ```
 
 ### `NEXT_PUBLIC_CHAIN_CURRENCY`
 
-The currency of the Ethereum network.
+The native currency of the blockchain network.
 
 ```dosini
 # Format
@@ -142,23 +92,23 @@ NEXT_PUBLIC_CHAIN_CURRENCY=Ether|ETH|18
 
 ### `NEXT_PUBLIC_CHAIN_RPC_URL`
 
-The RPC URL for the Ethereum network.
+The RPC URL for the blockchain network.
 
 ```dosini
-# Example
-NEXT_PUBLIC_CHAIN_RPC_URL=https://cloudflare-eth.com
+# Example (Arbitrum One)
+NEXT_PUBLIC_CHAIN_RPC_URL=https://arb1.arbitrum.io/rpc
 ```
 
 ### `NEXT_PUBLIC_CHAIN_BLOCK_EXPLORER`
 
-The block explorer for the Ethereum network. Optional.
+The block explorer for the blockchain network. Optional.
 
 ```dosini
 # Format
 NEXT_PUBLIC_CHAIN_BLOCK_EXPLORER=name|url
 
-# Example
-NEXT_PUBLIC_CHAIN_BLOCK_EXPLORER=Etherscan|https://etherscan.io
+# Example (Arbitrum One)
+NEXT_PUBLIC_CHAIN_BLOCK_EXPLORER=Arbiscan|https://arbiscan.io
 ```
 
 ### `NEXT_PUBLIC_CHAIN_CONTRACT_ENS_REGISTRY`
@@ -232,12 +182,18 @@ NEXT_PUBLIC_BLOCKING_VPNAPI=1234|US,CA
 
 ### `NEXT_PUBLIC_DEMO_MODE`
 
-Enable or disable demo mode for testing purposes.
+Enable or disable demo mode for testing purposes. When enabled, the app uses mock data instead of real blockchain interactions and gracefully handles API failures.
 
 ```dosini
 # Example
 NEXT_PUBLIC_DEMO_MODE=false
 ```
+
+**Demo Mode Features:**
+
+- Uses predefined mock data for positions, balances, and protocol statistics
+- Fallback behavior when external APIs (subgraph, CoinGecko) are unavailable
+- Allows testing UI components without requiring blockchain connectivity
 
 ### `NEXT_PUBLIC_DELEGATE_AUTO`
 
@@ -261,15 +217,6 @@ NEXT_PUBLIC_DEPLOYMENT_FLAVOR=preview
 
 URL for fetching known initiatives data (optional).
 
-### `NEXT_PUBLIC_LIQUITY_STATS_URL`
-
-URL for fetching Liquity protocol statistics.
-
-```dosini
-# Example
-NEXT_PUBLIC_LIQUITY_STATS_URL=https://api.liquity.org/v2/testnet/sepolia.json
-```
-
 ### `NEXT_PUBLIC_SAFE_API_URL`
 
 URL for the Safe transaction service API.
@@ -281,12 +228,14 @@ NEXT_PUBLIC_SAFE_API_URL=https://safe-transaction-mainnet.safe.global/api
 
 ### `NEXT_PUBLIC_SUBGRAPH_URL`
 
-URL for The Graph protocol subgraph queries.
+URL for The Graph protocol subgraph queries. Used for fetching protocol statistics like trove counts, TVL, and other on-chain data efficiently.
 
 ```dosini
 # Example
 NEXT_PUBLIC_SUBGRAPH_URL=https://api.studio.thegraph.com/query/…
 ```
+
+**Note:** If this URL is not set or invalid, the app will fall back to demo mode data for subgraph-dependent features.
 
 ### `NEXT_PUBLIC_VERCEL_ANALYTICS`
 
@@ -303,15 +252,14 @@ A WalletConnect project ID which can be obtained by [creating a WalletConnect pr
 
 ### `NEXT_PUBLIC_CONTRACT_…`
 
-Addresses of the Liquity contracts.
+Addresses of the Nerite contracts.
 
 </details>
-
 ## Folder Structure
 
-```
+```text
 src/
-  abi/         # ABIs of the Liquity contracts
+  abi/         # ABIs of the Nerite contracts
   app/         # The Next.js app (mostly routing only)
   comps/       # UI Components
   demo-mode/   # Files related to the app running in demo mode

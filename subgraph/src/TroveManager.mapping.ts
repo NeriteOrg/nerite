@@ -4,6 +4,8 @@ import {
   BatchUpdated as BatchUpdatedEvent,
   TroveManager as TroveManagerContract,
   TroveOperation as TroveOperationEvent,
+  TroveUpdated as TroveUpdatedEvent,
+  BatchedTroveUpdated as BatchedTroveUpdatedEvent,
 } from "../generated/templates/TroveManager/TroveManager";
 import { TroveNFT as TroveNFTContract } from "../generated/templates/TroveManager/TroveNFT";
 import { BorrowerTrovesCountUpdate, updateBorrowerTrovesCount } from "./shared";
@@ -418,4 +420,71 @@ export function handleBatchUpdated(event: BatchUpdatedEvent): void {
   batch.annualInterestRate = event.params._annualInterestRate;
   batch.annualManagementFee = event.params._annualManagementFee;
   batch.save();
+}
+
+// TODO: Test this
+export function handleTroveUpdated(event: TroveUpdatedEvent): void {
+  let troveId = event.params._troveId;
+  let timestamp = event.block.timestamp;
+  let tm = TroveManagerContract.bind(event.address);
+
+  let troveNft = TroveNFTContract.bind(Address.fromBytes(
+    dataSource.context().getBytes("address:troveNft"),
+  ));
+
+  let trove: Trove
+  
+  let owner = troveNft.try_ownerOf(troveId);
+  if (!(owner.reverted || owner.value === Address.fromString("0x0000000000000000000000000000000000000000"))) {
+    // Update the trove with latest data, no leverage change and don't create if missing
+    trove = updateTrove(tm, troveId, timestamp, LeverageUpdate.unchanged, true);
+  } else {
+    // Update the trove with latest data, no leverage change and don't create if missing
+    trove = updateTrove(tm, troveId, timestamp, LeverageUpdate.unchanged, false);
+  }
+  
+  // Ensure the trove is active
+  trove.status = "active";
+  trove.save();
+}
+
+// TODO: Test this
+export function handleBatchedTroveUpdated(event: BatchedTroveUpdatedEvent): void {
+  let troveId = event.params._troveId;
+  let timestamp = event.block.timestamp;
+  let tm = TroveManagerContract.bind(event.address);
+
+  let troveNft = TroveNFTContract.bind(Address.fromBytes(
+    dataSource.context().getBytes("address:troveNft"),
+  ));
+  
+  // Update the trove with latest data, no leverage change and don't create if missing
+  let trove: Trove;
+
+  let owner = troveNft.try_ownerOf(troveId);
+  if (!(owner.reverted || owner.value === Address.fromString("0x0000000000000000000000000000000000000000"))) {
+    // Update the trove with latest data, no leverage change and don't create if missing
+    trove = updateTrove(tm, troveId, timestamp, LeverageUpdate.unchanged, true);
+  } else {
+    // Update the trove with latest data, no leverage change and don't create if missing
+    trove = updateTrove(tm, troveId, timestamp, LeverageUpdate.unchanged, false);
+  }
+  
+  // Ensure the trove is part of the correct batch
+  let collId = dataSource.context().getString("collId");
+  let batchId = collId + ":" + event.params._interestBatchManager.toHexString();
+  
+  // Only update the batch reference if it's changed
+  if (trove.interestBatch !== batchId) {
+    // If the trove was in a different batch, leave that batch first
+    if (trove.interestBatch !== null) {
+      leaveBatch(collId, troveId, BigInt.fromI32(0));
+    }
+    
+    // Set the new batch
+    trove.interestBatch = batchId;
+    trove.interestRate = BigInt.fromI32(0); // in batch means rate is 0
+    trove.status = "active";
+    trove.save();
+  }
 }

@@ -38,8 +38,6 @@ export function vCollIndex() {
     v.literal(5),
     v.literal(6),
     v.literal(7),
-    v.literal(8),
-    v.literal(9),
   ]);
 }
 
@@ -229,9 +227,18 @@ export function vPositionEarn() {
     collIndex: vCollIndex(),
     deposit: vDnum(),
     rewards: v.object({
-      bold: vDnum(),
+      usnd: vDnum(),
       coll: vDnum(),
     }),
+  });
+}
+
+export function vPositionYusnd() {
+  return v.object({
+    type: v.literal("yusnd"),
+    owner: vAddress(),
+    usnd: vDnum(),
+    yusnd: vDnum(),
   });
 }
 
