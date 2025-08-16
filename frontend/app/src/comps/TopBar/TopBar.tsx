@@ -6,7 +6,7 @@ import { Logo } from "@/src/comps/Logo/Logo";
 import { Tag } from "@/src/comps/Tag/Tag";
 import content from "@/src/content";
 import {
-  // BUY_PAGE_URL, 
+  BUY_PAGE_URL, 
   DEPLOYMENT_FLAVOR 
 } from "@/src/env";
 import { css } from "@/styled-system/css";
@@ -14,16 +14,16 @@ import {
   IconBorrow,
   IconDashboard,
   IconEarn,
-  IconStake as IconStream,
-  // IconLeverage,
+  IconStake as IconBuy,
+  IconLeverage as IconStream,
   // IconStake,
 } from "@liquity2/uikit";
 import Link from "next/link";
 import { AccountButton } from "./AccountButton";
 import { Menu } from "./Menu";
 
-// const buyPageUrl = BUY_PAGE_URL ?? "/buy";
-// const buyPageTarget = BUY_PAGE_URL ? "_blank" : "_self";
+const buyPageUrl = BUY_PAGE_URL ?? "/buy";
+const buyPageTarget = BUY_PAGE_URL ? "_blank" : "_self";
 
 const menuItems: ComponentProps<typeof Menu>["menuItems"] = [
   [content.menu.dashboard, "/", IconDashboard, "dashboard", "_self"],
@@ -32,7 +32,7 @@ const menuItems: ComponentProps<typeof Menu>["menuItems"] = [
   [content.menu.earn, "/earn", IconEarn, "earn", "_self"],
   [content.menu.stream, "https://app.superfluid.org/", IconStream, "stream", "_blank"],
   // [content.menu.stake, "/stake", IconStake, "stake"],
-  // [content.menu.buy, buyPageUrl, IconStake, "buy", buyPageTarget],
+  [content.menu.buy, buyPageUrl, IconBuy, "buy", buyPageTarget],
 ];
 
 export function TopBar() {
