@@ -6,6 +6,7 @@ import {
   graphQuery,
   BalancesByTokenQuery,
   BalancesForHoldersQuery,
+  AllocationsQuery,
 } from "./shell-queries";
 import { CONTRACT_SHELL_TOKEN } from "./env";
 import { getUniswapPositionsByOwners, PoolKey } from "./uniswap-hooks";
@@ -14,7 +15,7 @@ import { useWagmiConfig } from "@/src/services/Arbitrum";
 import { CONTRACT_ADDRESSES } from "./contracts";
 import { UniswapV4PositionManager } from "./abi/UniswapV4PositionManager";
 import { Abi } from "abitype";
-import { isAddressEqual, zeroAddress } from "viem";
+import { getAddress, isAddressEqual, zeroAddress } from "viem";
 
 type Options = {
   refetchInterval?: number;
@@ -104,6 +105,63 @@ export function useShellActivitiesOfHolders(
       })));
     },
     enabled: Boolean(holders && holders.length > 0),
+    ...prepareOptions(options),
+  });
+}
+
+export function useAllocations(
+  users?: Address[],
+  options?: Options,
+) {
+  const config = useWagmiConfig();
+  let queryFn = async () => {
+    const { allocations } = await graphQuery(
+      AllocationsQuery,
+      { users: users?.map(String) ?? [] },
+    );
+
+    const positions = await getUniswapPositionsByOwners(users ?? []);
+    console.log("positions", positions);
+
+    const existingOwners = new Set<string>();
+    const uniswapV4Positions = positions ? (await readContracts(config, {
+      allowFailure: false,
+      contracts: positions.map((position) => ({
+        address: CONTRACT_ADDRESSES.strategies.UniswapV4 as Address,
+        abi: UniswapV4PositionManager as Abi,
+        functionName: "getPoolAndPositionInfo",
+        args: [position.tokenId],
+      })),
+    }) as [PoolKey, bigint][])
+      .map(([poolKey], i) => ({
+        poolKey,
+        ...positions[i]
+      }))
+      .filter(
+        ({ poolKey, owner }) => {
+          const valid = (isAddressEqual(poolKey.currency0, CONTRACT_ADDRESSES.BoldToken) || isAddressEqual(poolKey.currency1, CONTRACT_ADDRESSES.BoldToken))
+            && owner !== zeroAddress
+          if (valid && owner && !existingOwners.has(owner.toLowerCase())) {
+            existingOwners.add(owner.toLowerCase());
+            return true;
+          }
+          return false;
+        }
+      ) : []
+
+    return allocations.map(allo => {
+      const exists = !!uniswapV4Positions.find(position => position.owner && isAddressEqual(getAddress(position.owner!), getAddress(allo.user)));
+      return {
+        ...allo,
+        activities: exists ? [...allo.activities, { label: "Uniswap" }] : allo.activities,
+      }
+    });
+  };
+
+  return useQuery({
+    queryKey: ["Allocations", users],
+    queryFn,
+    enabled: Boolean(users && users.length > 0),
     ...prepareOptions(options),
   });
 }

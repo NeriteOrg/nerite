@@ -60,3 +60,14 @@ export const BalancesForHoldersQuery = graphql(`
     }
   }
 `)
+
+export const AllocationsQuery = graphql(`
+  query Allocations($users: [Bytes!]!) {
+    allocations(
+      where: { user_in: $users }
+    ) {
+      user
+      activities { label }
+    }
+  }
+`)

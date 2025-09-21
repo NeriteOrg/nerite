@@ -4,71 +4,71 @@ import { useMemo, useState } from 'react';
 import { getSnailIcon } from '@/src/comps/SnailIcons/snail-icons';
 import { css, cx } from '@/styled-system/css';
 import { LinkTextButton } from '@/src/comps/LinkTextButton/LinkTextButton';
-import { useShellActivitiesOfHolders, useShellBalances } from '@/src/shell-hooks';
+import { useAllocations, useShellBalances } from '@/src/shell-hooks';
 import { Address, formatUnits, getAddress, isAddressEqual } from 'viem';
-import { CONTRACT_ADDRESSES } from '@/src/contracts';
+// import { CONTRACT_ADDRESSES } from '@/src/contracts';
 import { useQuery } from '@tanstack/react-query';
-import { CollIndex } from '@/src/types';
-import { useLoansByAccounts } from '@/src/subgraph-hooks';
+// import { CollIndex } from '@/src/types';
+// import { useLoansByAccounts } from '@/src/subgraph-hooks';
 import { getEnsName } from 'viem/ens';
 import { getMainnetPublicClient } from '@/src/shellpoints/utils/client';
 
-const LOCAL_STORAGE_STABILITY_POOL_DEPOSITORS_DATA = 'yusnd_stability_pool_depositors_data';
-const LOCAL_STORAGE_STABILITY_POOL_DEPOSITORS_DATA_EXPIRY = 'yusnd_stability_pool_depositors_data_expiry';
+// const LOCAL_STORAGE_STABILITY_POOL_DEPOSITORS_DATA = 'yusnd_stability_pool_depositors_data';
+// const LOCAL_STORAGE_STABILITY_POOL_DEPOSITORS_DATA_EXPIRY = 'yusnd_stability_pool_depositors_data_expiry';
 
-function getExpiryTime() {
-  const now = new Date();
-  const utcYear = now.getUTCFullYear();
-  const utcMonth = now.getUTCMonth();
-  const utcDate = now.getUTCDate();
-  // 18:00 UTC today
-  const refreshTime = Date.UTC(utcYear, utcMonth, utcDate, 18, 5, 0, 0); // 5 minutes after 18:00 UTC today
-  if (refreshTime < now.getTime()) {
-    return refreshTime + 1000 * 60 * 60 * 24;
-  }
-  return refreshTime;
-};
+// function getExpiryTime() {
+//   const now = new Date();
+//   const utcYear = now.getUTCFullYear();
+//   const utcMonth = now.getUTCMonth();
+//   const utcDate = now.getUTCDate();
+//   // 18:00 UTC today
+//   const refreshTime = Date.UTC(utcYear, utcMonth, utcDate, 18, 5, 0, 0); // 5 minutes after 18:00 UTC today
+//   if (refreshTime < now.getTime()) {
+//     return refreshTime + 1000 * 60 * 60 * 24;
+//   }
+//   return refreshTime;
+// };
 
-function useStabilityPoolDepositors(addresses?: Address[]) {
-  return useQuery({
-    queryKey: ['stability-pool-depositors', addresses],
-    queryFn: async () => {
-      if (typeof localStorage !== 'undefined') {
-        const stabilityPoolDepositorsLS = localStorage.getItem(LOCAL_STORAGE_STABILITY_POOL_DEPOSITORS_DATA);
-        const stabilityPoolDepositorsExpiry = localStorage.getItem(LOCAL_STORAGE_STABILITY_POOL_DEPOSITORS_DATA_EXPIRY);
-        if (stabilityPoolDepositorsLS && stabilityPoolDepositorsExpiry && Number(stabilityPoolDepositorsExpiry) >= Date.now()) {
-          return JSON.parse(stabilityPoolDepositorsLS) as { stabilityPool: Record<`0x${string}`, { branch: CollIndex, amount: string, blockNumber: string, decimals: number }[]>, yusnd: Address[] };
-        }
-      }
-      const response = await fetch('/api/stability-pool', {
-        method: 'POST',
-        body: JSON.stringify({ addresses }),
-      });
-      const data = await response.json() as {
-        success: boolean;
-        result: {
-          stabilityPool: Record<`0x${string}`, {
-            branch: CollIndex;
-            amount: string;
-            blockNumber: string;
-            decimals: number;
-          }[]>, 
-          yusnd: Address[]
-        } | undefined;
-        error: string | undefined;
-      };
-      if (!data.success) {
-        throw new Error(data.error);
-      }
-      if (typeof localStorage !== 'undefined') {
-        localStorage.setItem(LOCAL_STORAGE_STABILITY_POOL_DEPOSITORS_DATA, JSON.stringify(data.result));
-        localStorage.setItem(LOCAL_STORAGE_STABILITY_POOL_DEPOSITORS_DATA_EXPIRY, getExpiryTime().toString());
-      }
-      return data.result;
-    },
-    enabled: addresses && addresses.length > 0,
-  })
-}
+// function useStabilityPoolDepositors(addresses?: Address[]) {
+//   return useQuery({
+//     queryKey: ['stability-pool-depositors', addresses],
+//     queryFn: async () => {
+//       if (typeof localStorage !== 'undefined') {
+//         const stabilityPoolDepositorsLS = localStorage.getItem(LOCAL_STORAGE_STABILITY_POOL_DEPOSITORS_DATA);
+//         const stabilityPoolDepositorsExpiry = localStorage.getItem(LOCAL_STORAGE_STABILITY_POOL_DEPOSITORS_DATA_EXPIRY);
+//         if (stabilityPoolDepositorsLS && stabilityPoolDepositorsExpiry && Number(stabilityPoolDepositorsExpiry) >= Date.now()) {
+//           return JSON.parse(stabilityPoolDepositorsLS) as { stabilityPool: Record<`0x${string}`, { branch: CollIndex, amount: string, blockNumber: string, decimals: number }[]>, yusnd: Address[] };
+//         }
+//       }
+//       const response = await fetch('/api/stability-pool', {
+//         method: 'POST',
+//         body: JSON.stringify({ addresses }),
+//       });
+//       const data = await response.json() as {
+//         success: boolean;
+//         result: {
+//           stabilityPool: Record<`0x${string}`, {
+//             branch: CollIndex;
+//             amount: string;
+//             blockNumber: string;
+//             decimals: number;
+//           }[]>, 
+//           yusnd: Address[]
+//         } | undefined;
+//         error: string | undefined;
+//       };
+//       if (!data.success) {
+//         throw new Error(data.error);
+//       }
+//       if (typeof localStorage !== 'undefined') {
+//         localStorage.setItem(LOCAL_STORAGE_STABILITY_POOL_DEPOSITORS_DATA, JSON.stringify(data.result));
+//         localStorage.setItem(LOCAL_STORAGE_STABILITY_POOL_DEPOSITORS_DATA_EXPIRY, getExpiryTime().toString());
+//       }
+//       return data.result;
+//     },
+//     enabled: addresses && addresses.length > 0,
+//   })
+// }
 
 function useEnsNames(addresses?: Address[]) {
   return useQuery({
@@ -82,45 +82,45 @@ function useEnsNames(addresses?: Address[]) {
   })
 }
 
-type LeaderboardActivityLabel = 
-  | "yUSND"
-  | "Balancer"
-  | "Bunni"
-  | "Camelot"
-  | "Spectra"
-  | "Uniswap"
-  | "GoSlow NFT"
-  | "Borrowing"
-  | "Stability Pool";
+// type LeaderboardActivityLabel = 
+//   | "yUSND"
+//   | "Balancer"
+//   | "Bunni"
+//   | "Camelot"
+//   | "Spectra"
+//   | "Uniswap"
+//   | "GoSlow NFT"
+//   | "Borrowing"
+//   | "Stability Pool";
 
-function getLeaderboardActivityName(activity: Address): LeaderboardActivityLabel | null {
-  switch (activity.toLowerCase()) {
-    case CONTRACT_ADDRESSES.YUSND.toLowerCase():
-      return "yUSND";
-    case CONTRACT_ADDRESSES.strategies.Balancer.toLowerCase():
-      return "Balancer";
-    case CONTRACT_ADDRESSES.strategies.Balancer2.toLowerCase():
-      return "Balancer";
-    case CONTRACT_ADDRESSES.strategies.Balancer3.toLowerCase():
-      return "Balancer";
-    case CONTRACT_ADDRESSES.strategies.Bunni.toLowerCase():
-      return "Bunni";
-    case CONTRACT_ADDRESSES.strategies.Camelot.toLowerCase():
-      return "Camelot";
-    case CONTRACT_ADDRESSES.strategies.Spectra.toLowerCase():
-      return "Spectra";
-    case CONTRACT_ADDRESSES.GoSlowNft.toLowerCase():
-      return "GoSlow NFT";
-    case CONTRACT_ADDRESSES.strategies.UniswapV4.toLowerCase():
-      return "Uniswap";
-    // case "trove":
-    //   return "Borrowing";
-    // case "stabilityPool":
-    //   return "Stability Pool";
-    default:
-      return null;
-  }
-}
+// function getLeaderboardActivityName(activity: Address): LeaderboardActivityLabel | null {
+//   switch (activity.toLowerCase()) {
+//     case CONTRACT_ADDRESSES.YUSND.toLowerCase():
+//       return "yUSND";
+//     case CONTRACT_ADDRESSES.strategies.Balancer.toLowerCase():
+//       return "Balancer";
+//     case CONTRACT_ADDRESSES.strategies.Balancer2.toLowerCase():
+//       return "Balancer";
+//     case CONTRACT_ADDRESSES.strategies.Balancer3.toLowerCase():
+//       return "Balancer";
+//     case CONTRACT_ADDRESSES.strategies.Bunni.toLowerCase():
+//       return "Bunni";
+//     case CONTRACT_ADDRESSES.strategies.Camelot.toLowerCase():
+//       return "Camelot";
+//     case CONTRACT_ADDRESSES.strategies.Spectra.toLowerCase():
+//       return "Spectra";
+//     case CONTRACT_ADDRESSES.GoSlowNft.toLowerCase():
+//       return "GoSlow NFT";
+//     case CONTRACT_ADDRESSES.strategies.UniswapV4.toLowerCase():
+//       return "Uniswap";
+//     // case "trove":
+//     //   return "Borrowing";
+//     // case "stabilityPool":
+//     //   return "Stability Pool";
+//     default:
+//       return null;
+//   }
+// }
 
 export default function ShellsPage() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -133,34 +133,40 @@ export default function ShellsPage() {
   } = useShellBalances();
   const shellHolders = shellBalances?.map((balance) => getAddress(balance.holder));
   const {
-    data: shellActivitiesOfHolders, 
-    isLoading: isLoadingShellActivitiesOfHolders, 
-    error: errorShellActivitiesOfHolders
-  } = useShellActivitiesOfHolders(shellHolders);
-  const {
-    data: stabilityPoolDepositors, 
-    isLoading: isLoadingStabilityPoolDepositors, 
-    error: errorStabilityPoolDepositors
-  } = useStabilityPoolDepositors(shellHolders);
-  const {
-    data: loansByAccounts,
-    isLoading: isLoadingLoansByAccounts,
-    error: errorLoansByAccounts
-  } = useLoansByAccounts(shellHolders);
+    data: shellAllocations,
+    isLoading: isLoadingShellAllocations,
+    error: errorShellAllocations
+  } = useAllocations(shellHolders);
+  // const {
+  //   data: shellActivitiesOfHolders, 
+  //   isLoading: isLoadingShellActivitiesOfHolders, 
+  //   error: errorShellActivitiesOfHolders
+  // } = useShellActivitiesOfHolders(shellHolders);
+  // const {
+  //   data: stabilityPoolDepositors, 
+  //   isLoading: isLoadingStabilityPoolDepositors, 
+  //   error: errorStabilityPoolDepositors
+  // } = useStabilityPoolDepositors(shellHolders);
+  // const {
+  //   data: loansByAccounts,
+  //   isLoading: isLoadingLoansByAccounts,
+  //   error: errorLoansByAccounts
+  // } = useLoansByAccounts(shellHolders);
   const { data: ensNames } = useEnsNames(shellHolders);
 
   const users = useMemo(() => {
     return shellBalances?.map((balance, index) => {
       const address = getAddress(balance.holder);
-      const activities = Array.from(new Set([
-        ...(loansByAccounts && loansByAccounts.some(loan => isAddressEqual(getAddress(loan.borrower), address)) ? ['Borrowing'] : []),
-        ...(stabilityPoolDepositors && Object.keys(stabilityPoolDepositors.stabilityPool).some(depositor => isAddressEqual(getAddress(depositor), address)) ? ['Stability Pool'] : []),
-        ...(stabilityPoolDepositors && stabilityPoolDepositors.yusnd.some(depositor => isAddressEqual(getAddress(depositor), address)) ? ['yUSND'] : []),
-        ...(shellActivitiesOfHolders?.filter(
-            (activity) => isAddressEqual(getAddress(activity.holder), address)
-          )
-          .map((activity) => getLeaderboardActivityName(getAddress(activity.token))) ?? []).filter((activity) => activity !== null),
-      ] as LeaderboardActivityLabel[]));
+      // const activities = Array.from(new Set([
+      //   ...(loansByAccounts && loansByAccounts.some(loan => isAddressEqual(getAddress(loan.borrower), address)) ? ['Borrowing'] : []),
+      //   ...(stabilityPoolDepositors && Object.keys(stabilityPoolDepositors.stabilityPool).some(depositor => isAddressEqual(getAddress(depositor), address)) ? ['Stability Pool'] : []),
+      //   ...(stabilityPoolDepositors && stabilityPoolDepositors.yusnd.some(depositor => isAddressEqual(getAddress(depositor), address)) ? ['yUSND'] : []),
+      //   ...(shellActivitiesOfHolders?.filter(
+      //       (activity) => isAddressEqual(getAddress(activity.holder), address)
+      //     )
+      //     .map((activity) => getLeaderboardActivityName(getAddress(activity.token))) ?? []).filter((activity) => activity !== null),
+      // ] as LeaderboardActivityLabel[]));
+      const activities = shellAllocations?.find(allocation => isAddressEqual(getAddress(allocation.user), address))?.activities.map(activity => activity.label) ?? [];
       return {
         address,
         ensName: ensNames?.find(ensName => isAddressEqual(ensName.address, address))?.ensName ?? null,
@@ -168,11 +174,12 @@ export default function ShellsPage() {
           total: parseInt(formatUnits(balance.balance, 18)),
           mostRecent: null,
         },
-        activities: activities.length > 0 ? activities : ['Stability Pool'],
+        activities,
+        // activities: activities.length > 0 ? activities : ['Stability Pool'],
         rank: index + 1,
       }
     }) ?? [];
-  }, [shellBalances, shellActivitiesOfHolders, stabilityPoolDepositors, loansByAccounts, ensNames]);
+  }, [shellBalances, shellAllocations, ensNames]);
 
   const filteredUsers = useMemo(() => {
     return users?.filter(user => 
@@ -188,8 +195,8 @@ export default function ShellsPage() {
   //   console.log("loansByAccounts", loansByAccounts);
   // }, [shellBalances, shellActivitiesOfHolders, stabilityPoolDepositors, loansByAccounts]);
 
-  const isLoading = isLoadingShellBalances || isLoadingShellActivitiesOfHolders || isLoadingStabilityPoolDepositors || isLoadingLoansByAccounts;
-  const error = errorShellBalances || errorShellActivitiesOfHolders || errorStabilityPoolDepositors || errorLoansByAccounts;
+  const isLoading = isLoadingShellBalances || isLoadingShellAllocations;
+  const error = errorShellBalances || errorShellAllocations;
 
   const formatAddress = (address: string) => {
     return `${address.slice(0, 6)}...${address.slice(-4)}`;

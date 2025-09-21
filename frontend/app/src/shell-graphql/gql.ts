@@ -17,10 +17,12 @@ import * as types from './graphql';
 type Documents = {
     "\n  query BalancesByToken($token: Bytes!) {\n    balances(\n      where: { token: $token }\n      orderBy: balance\n      orderDirection: desc\n    ) {\n      holder\n      token\n      balance\n    }\n  }\n": typeof types.BalancesByTokenDocument,
     "\n  query BalancesForHolders($token: Bytes!, $holders: [Bytes!]!) {\n    balances(\n      where: {\n        token_not: $token\n        holder_in: $holders\n      }\n    ) {\n      holder\n      token\n      balance\n    }\n  }\n": typeof types.BalancesForHoldersDocument,
+    "\n  query Allocations($users: [Bytes!]!) {\n    allocations(\n      where: { user_in: $users }\n    ) {\n      user\n      activities { label }\n    }\n  }\n": typeof types.AllocationsDocument
 };
 const documents: Documents = {
     "\n  query BalancesByToken($token: Bytes!) {\n    balances(\n      where: { token: $token }\n      orderBy: balance\n      orderDirection: desc\n    ) {\n      holder\n      token\n      balance\n    }\n  }\n": types.BalancesByTokenDocument,
     "\n  query BalancesForHolders($token: Bytes!, $holders: [Bytes!]!) {\n    balances(\n      where: {\n        token_not: $token\n        holder_in: $holders\n      }\n    ) {\n      holder\n      token\n      balance\n    }\n  }\n": types.BalancesForHoldersDocument,
+    "\n  query Allocations($users: [Bytes!]!) {\n    allocations(\n      where: { user_in: $users }\n    ) {\n      user\n      activities { label }\n    }\n  }\n": types.AllocationsDocument,
 };
 
 /**
@@ -31,6 +33,10 @@ export function graphql(source: "\n  query BalancesByToken($token: Bytes!) {\n  
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(source: "\n  query BalancesForHolders($token: Bytes!, $holders: [Bytes!]!) {\n    balances(\n      where: {\n        token_not: $token\n        holder_in: $holders\n      }\n    ) {\n      holder\n      token\n      balance\n    }\n  }\n"): typeof import('./graphql').BalancesForHoldersDocument;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  query Allocations($users: [Bytes!]!) {\n    allocations(\n      where: { user_in: $users }\n    ) {\n      user\n      activities { label }\n    }\n  }\n"): typeof import('./graphql').AllocationsDocument;
 
 
 export function graphql(source: string) {
