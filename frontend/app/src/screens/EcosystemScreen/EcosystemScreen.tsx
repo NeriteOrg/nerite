@@ -1,7 +1,6 @@
 "use client";
 
 import { Screen } from "@/src/comps/Screen/Screen";
-import { SubScreen } from "@/src/comps/Screen/SubScreen";
 import { LinkTextButton } from "@/src/comps/LinkTextButton/LinkTextButton";
 import content from "@/src/content";
 import { css } from "@/styled-system/css";
@@ -11,7 +10,6 @@ import {
   EcosystemPartnerSummary, 
   type EcosystemPartnerId 
 } from "@/src/comps/EcosystemPartnerSummary/EcosystemPartnerSummary";
-import Image from "next/image";
 
 export function EcosystemScreen() {
   const bpName = useBreakpointName();
@@ -49,73 +47,36 @@ export function EcosystemScreen() {
   return (
     <Screen
       heading={{
-        title: (
-          <div
-            className={css({
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: 8,
-            })}
-          >
-            {content.ecosystemScreen.headline(
-              <div
-                className={css({
-                  width: 40,
-                  height: 40,
-                  position: "relative",
-                  display: "inline-flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                })}
-              >
-                <Image
-                  src="/cute-snails/red.png"
-                  alt="Ecosystem"
-                  width={40}
-                  height={40}
-                  style={{ objectFit: "contain" }}
-                />
-              </div>
-            )}
-          </div>
-        ),
+        title: 'Ecosystem',
         subtitle: content.ecosystemScreen.subheading,
       }}
       width={BREAKPOINTS[bpName]}
       gap={16}
     >
-      <SubScreen
-        heading={{
-          title: "Ecosystem Partners",
-        }}
-        gap={32}
-        paddingTop={24}
-      >
-        <div className={css({
-          display: "grid",
-          gridTemplateColumns: bpName === "large" ? "repeat(4, 1fr)" : "repeat(2, 1fr)",
-          gap: 16,
-          justifyItems: "center",
-        })}>
-          {partnersTransition((style, partnerId) => (
-            <a.div style={style}>
-              <EcosystemPartnerSummary partnerId={partnerId} />
-            </a.div>
-          ))}
-        </div>
-        <div className={css({
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          color: "content",
-          gap: 8,
-        })}>
-          <p>
-            Want to partner with us? Reach out in our #partnerships channel on <LinkTextButton href="https://discord.gg/5h3avBYxcn" target="_blank" rel="noopener noreferrer" label="Discord" />.
-          </p>
-        </div>
-      </SubScreen>
+      <div className={css({
+        display: "grid",
+        gridTemplateColumns: bpName === "large" ? "repeat(4, 1fr)" : "repeat(2, 1fr)",
+        gap: 16,
+        justifyItems: "center",
+        marginBottom: 32,
+      })}>
+        {partnersTransition((style, partnerId) => (
+          <a.div style={style}>
+            <EcosystemPartnerSummary partnerId={partnerId} />
+          </a.div>
+        ))}
+      </div>
+      <div className={css({
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        color: "content",
+        gap: 8,
+      })}>
+        <p>
+          Want to partner with us? Reach out in our #partnerships channel on <LinkTextButton href="https://discord.gg/5h3avBYxcn" target="_blank" rel="noopener noreferrer" label="Discord" />.
+        </p>
+      </div>
     </Screen>
   );
 }
