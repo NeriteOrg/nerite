@@ -31,6 +31,7 @@ export type StrategyId =
   | "camelot"
   | "spectra"
   | "teller"
+  | "pooltogether";
 
 export type Strategy = {
   id: StrategyId;
