@@ -7,32 +7,120 @@
 
 ## How to develop
 
+### Prerequisites
+
+Before starting, make sure you're on the `develop` branch:
+
+```sh
+git checkout develop
+```
+
+### Environment Setup
+
 Copy the `.env.example` file to `.env.local`:
 
 ```sh
 cp .env.example .env.local
 ```
 
-Edit the `.env.local` file to set the environment variables.
+The `.env.example` file contains all necessary environment variables pre-configured for Arbitrum mainnet, including:
+- Chain configuration (Arbitrum One)
+- Contract addresses for all 8 collateral branches (ETH, WSTETH, RETH, RSETH, WEETH, ARB, COMP, TBTC)
+- Shared protocol contracts (USND token, CollateralRegistry, etc.)
 
-Run the development server:
+**Required variables you need to add:**
+
+1. **NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID**: Get one at [cloud.reown.com](https://cloud.reown.com/app)
+2. **NEXT_PUBLIC_CHAIN_RPC_URL**: Your Arbitrum RPC endpoint
+   - Get from [Alchemy](https://www.alchemy.com/) or [Infura](https://www.infura.io/)
+3. **NEXT_PUBLIC_SUBGRAPH_URL**: Main subgraph endpoint for protocol data
+   - Option 1: [GraphSeer](https://beta.graphseer.com/) - Use their gateway (see commented example in `.env.example`)
+   - Option 2: [The Graph Studio](https://thegraph.com/studio/) - Get subgraph API key (see commented example in `.env.example`)
+   
+   Replace `{your_api_key}` or `{graphseer_api_key}` placeholders with your actual key
+4. **ALCHEMY_API_KEY**: Your Alchemy API key
+   - Get from [Alchemy Dashboard](https://dashboard.alchemy.com/)
+5. **GRAPH_TOKEN_API_TOKEN**: The Graph API token for authenticated queries
+   - Generate in [The Graph Studio](https://thegraph.com/studio/) under API Keys
+
+**Highly recommended:**
+- **NEXT_PUBLIC_COINGECKO_API_KEY**: Format: `demo|API_KEY` or `pro|API_KEY`
+  - Get API key from [CoinGecko](https://www.coingecko.com/en/api)
+- **NEXT_PUBLIC_SHELL_SUBGRAPH_URL**: Shell points subgraph (contact team for access)
+- **NEXT_PUBLIC_SUMMERSTONE_API_URL**: Summerstone API endpoint (contact team for access)
+- **NEXT_PUBLIC_YUSND_STATS_URL**: yUSND statistics endpoint (contact team for access)
+
+**Optional variables:**
+- **NEXT_PUBLIC_DEMO_MODE**: Set to `true` to use mock data for testing
+
+### Start Development
 
 ```sh
-cd nerite/frontend/app
-pnpm build-deps # only needed once
+pnpm i
+cd frontend/app
 pnpm dev
 ```
 
-You can now open <http://localhost:3000/> in your browser.
+The app will be available at <http://localhost:3000/>
+
+### Build for Production
+
+```sh
+cd frontend/app
+pnpm build
+```
+
+This creates an optimized production build in the `out/` directory.
+
+### Making Changes
+
+**Editing UI Components:**
+- Edit files in `src/comps/` or `src/screens/`
+- Changes hot-reload automatically
+
+**Editing UIKit Components:**
+
+The UIKit library (`frontend/uikit/`) contains shared components, icons, and UI primitives.
+
+```sh
+cd frontend/uikit
+# Edit components, icons, or other exports in src/
+pnpm build
+# Restart app dev server to pick up changes
+cd ../app
+pnpm dev
+```
+
+**Updating Styles:**
+```sh
+cd frontend/app
+# Edit panda.config.ts then restart dev server
+pnpm dev
+```
+
+Panda CSS regenerates automatically when you restart the dev server.
+
+**Updating GraphQL Queries:**
+
+Only needed when you modify queries in `src/subgraph-queries.ts` or similar files:
+
+```sh
+cd frontend/app
+# Edit queries in src/subgraph-queries.ts
+pnpm build-graphql  # Requires valid NEXT_PUBLIC_SUBGRAPH_URL
+pnpm dev
+```
+
+Note: `build-graphql` fetches the remote schema and validates your queries, so you need valid subgraph URLs configured.
 
 ## Scripts
 
 ```sh
 pnpm build                  # build the static app in out/
-pnpm build-deps             # build all the dependencies needed by the app
-pnpm build-graphql          # generate TypeScript types from GraphQL queries (requires valid NEXT_PUBLIC_SUBGRAPH_URL)
-pnpm build-panda            # update the code generated from the Panda CSS config
-pnpm build-uikit            # builds the UI kit in ../uikit
+pnpm build-deps             # build all dependencies (UIKit, Panda CSS, Banner)
+pnpm build-graphql          # regenerate GraphQL types (only needed when queries change)
+pnpm build-panda            # regenerate Panda CSS utilities
+pnpm build-uikit            # build the UI kit in ../uikit
 pnpm dev                    # run the development server
 pnpm fmt                    # format the code
 pnpm lint                   # lint the code
