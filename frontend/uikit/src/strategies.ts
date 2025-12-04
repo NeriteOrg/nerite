@@ -4,6 +4,7 @@ import strategyBalancer from "./strategy-icons/balancer.svg";
 import strategyCamelot from "./strategy-icons/camelot.png";
 import strategySpectra from "./strategy-icons/spectra.svg";
 import strategyTeller from "./strategy-icons/teller.png";
+import strategyPoolTogether from "./strategy-icons/pooltogether.jpeg";
 
 export function isStrategyId(id: string): id is StrategyId {
   return (
@@ -11,6 +12,7 @@ export function isStrategyId(id: string): id is StrategyId {
     || id === "camelot" 
     || id === "spectra" 
     || id === "teller" 
+    || id === "pooltogether"
   );
 }
 
@@ -38,11 +40,18 @@ export const TELLER: Strategy = {
   name: "Teller",
 } as const;
 
+export const POOLTOGETHER: Strategy = {
+  id: "pooltogether",
+  icon: strategyPoolTogether,
+  name: "PoolTogether",
+} as const;
+
 export const STRATEGIES: Strategy[] = [
   BALANCER,
   CAMELOT,
   SPECTRA,
   TELLER,
+  POOLTOGETHER,
 ] as const;
 
 export const STRATEGIES_BY_ID = {
@@ -50,4 +59,5 @@ export const STRATEGIES_BY_ID = {
   camelot: CAMELOT,
   spectra: SPECTRA,
   teller: TELLER,
+  pooltogether: POOLTOGETHER,
 } as const;
