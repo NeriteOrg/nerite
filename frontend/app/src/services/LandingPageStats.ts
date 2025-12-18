@@ -3,7 +3,7 @@ import { useLiquityStats } from "@/src/liquity-utils";
 import { useTroveCount } from "@/src/subgraph-hooks";
 import { DEMO_MODE, CHAIN_ID, CONTRACT_YUSND } from "@/src/env";
 import { useQuery } from "@tanstack/react-query";
-import { useReadContract } from "wagmi";
+import { useReadContract, useWalletClient } from "wagmi";
 import { getAddress } from "viem";
 // import * as v from "valibot";
 import * as dn from "dnum";
@@ -174,6 +174,7 @@ export function useGoSlowNFTCount() {
 
 export function useYusndWalletStatus() {
   const account = useAccount();
+  const { data: walletClient } = useWalletClient();
   const [hasAddedToWallet, setHasAddedToWallet] = useState(false);
   
   useEffect(() => {
@@ -210,10 +211,29 @@ export function useYusndWalletStatus() {
   const isLoading = isCheckingBalance && !hasAddedToWallet;
 
   const handleAddYusndToWallet = async () => {
-    if (!CONTRACT_YUSND || !window.ethereum) return;
+    if (!CONTRACT_YUSND) return;
 
     try {
-      const wasAdded = await window.ethereum.request({
+      const provider = walletClient?.transport;
+      if (!provider || !('request' in provider)) {
+        if (window.ethereum) {
+          await window.ethereum.request({
+            method: 'wallet_watchAsset',
+            params: {
+              type: 'ERC20',
+              options: {
+                address: CONTRACT_YUSND,
+                symbol: 'yUSND',
+                decimals: 18,
+                image: `${window.location.origin}/yusnd-icon.svg`,
+              },
+            },
+          });
+        }
+        return;
+      }
+
+      const wasAdded = await provider.request({
         method: 'wallet_watchAsset',
         params: {
           type: 'ERC20',

@@ -8,6 +8,7 @@ import { ACCOUNT_SCREEN } from "@/src/env";
 import { useAccount } from "@/src/services/Arbitrum";
 import { useLandingPageStats } from "@/src/services/LandingPageStats";
 import { usePrice } from "@/src/services/Prices";
+import { useYusndStats } from "@/src/yusnd";
 import { css } from "@/styled-system/css";
 import {
   AnchorTextButton,
@@ -233,12 +234,18 @@ export function ProtocolStats() {
 function Price({ symbol }: { symbol: TokenSymbol }) {
   if (symbol === "SHELL") return null;
   const price = usePrice(symbol === "YUSND" ? "USND" : symbol);
+  const yusndStats = symbol === "YUSND" ? useYusndStats() : null;
+  
+  const displayPrice = symbol === "YUSND" && yusndStats?.data?.yusndRate
+    ? yusndStats.data.yusndRate
+    : price.data;
+  
   return (
     <HFlex key={symbol} gap={4}>
       <TokenIcon size={16} symbol={symbol} />
       <HFlex gap={8}>
         <span>{symbol}</span>
-        <Amount prefix='$' fallback='…' value={price.data} format='2z' />
+        <Amount prefix='$' fallback='…' value={displayPrice} format='2z' />
       </HFlex>
     </HFlex>
   );
