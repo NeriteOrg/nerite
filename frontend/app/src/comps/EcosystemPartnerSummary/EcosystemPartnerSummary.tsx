@@ -18,7 +18,12 @@ export type EcosystemPartnerId =
   | "summerstone"
   | "octane"
   | "sherlock"
-  | "pooltogether";
+  | "pooltogether"
+  | "flowstate"
+  | "paladin"
+  | "balancer"
+  | "spectra"
+  | "privacypools";
 
 const COLLATERAL_INFO: Record<CollateralSymbol, { name: string; url: string }> = {
   "ETH": { name: "Ethereum", url: "https://ethereum.org/" },
@@ -115,6 +120,36 @@ export function EcosystemPartnerSummary({
       subtitle: "No-loss prize savings protocol",
       href: "https://pooltogether.com/",
       logo: "/images/ecosystem/pooltogether.jpeg",
+    },
+    flowstate: {
+      title: "Flow State",
+      subtitle: "Streaming funding for sustaining & rewarding impact work",
+      href: "https://flowstate.network/",
+      logo: "/images/ecosystem/flowstate.png",
+    },
+    paladin: {
+      title: "Paladin",
+      subtitle: "Governance incentives marketplace for DeFi protocols",
+      href: "https://quest.paladin.vote/",
+      logo: "/images/ecosystem/paladin.png",
+    },
+    balancer: {
+      title: "Balancer",
+      subtitle: "Programmable liquidity protocol for DeFi",
+      href: "https://balancer.fi/pools/arbitrum/v3/0x483bc7fe92fc392305dd97d4d3363e0e0a7f144d",
+      logo: "/images/ecosystem/balancer.svg",
+    },
+    spectra: {
+      title: "Spectra",
+      subtitle: "Interest rate derivatives and yield trading protocol",
+      href: "https://app.spectra.finance/pools/arb:0xdbfdad05d2d280195331582516813358f41d1cc4",
+      logo: "/images/ecosystem/spectra.jpeg",
+    },
+    privacypools: {
+      title: "Privacy Pools",
+      subtitle: "Compliant private transactions on Ethereum",
+      href: "https://privacypools.com/",
+      logo: "/images/ecosystem/privacypools.png",
     },
   };
 

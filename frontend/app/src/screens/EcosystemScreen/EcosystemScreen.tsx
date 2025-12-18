@@ -27,6 +27,11 @@ export function EcosystemScreen() {
     "octane",
     "sherlock",
     "pooltogether",
+    "flowstate",
+    "paladin",
+    "balancer",
+    "spectra",
+    "privacypools",
   ];
 
   const partnersTransition = useTransition(
