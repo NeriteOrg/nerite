@@ -28,6 +28,7 @@ export function EcosystemScreen() {
     "sherlock",
     "pooltogether",
     "flowstate",
+    "paladin",
   ];
 
   const partnersTransition = useTransition(

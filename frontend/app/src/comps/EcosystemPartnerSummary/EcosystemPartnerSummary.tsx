@@ -19,7 +19,8 @@ export type EcosystemPartnerId =
   | "octane"
   | "sherlock"
   | "pooltogether"
-  | "flowstate";
+  | "flowstate"
+  | "paladin";
 
 const COLLATERAL_INFO: Record<CollateralSymbol, { name: string; url: string }> = {
   "ETH": { name: "Ethereum", url: "https://ethereum.org/" },
@@ -122,6 +123,12 @@ export function EcosystemPartnerSummary({
       subtitle: "Streaming funding for sustaining & rewarding impact work",
       href: "https://flowstate.network/",
       logo: "/images/ecosystem/flowstate.png",
+    },
+    paladin: {
+      title: "Paladin",
+      subtitle: "Governance incentives marketplace for DeFi protocols",
+      href: "https://quest.paladin.vote/",
+      logo: "/images/ecosystem/paladin.png",
     },
   };
 
