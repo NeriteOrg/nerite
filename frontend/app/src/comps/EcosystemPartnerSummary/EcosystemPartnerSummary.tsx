@@ -20,7 +20,9 @@ export type EcosystemPartnerId =
   | "sherlock"
   | "pooltogether"
   | "flowstate"
-  | "paladin";
+  | "paladin"
+  | "balancer"
+  | "spectra";
 
 const COLLATERAL_INFO: Record<CollateralSymbol, { name: string; url: string }> = {
   "ETH": { name: "Ethereum", url: "https://ethereum.org/" },
@@ -129,6 +131,18 @@ export function EcosystemPartnerSummary({
       subtitle: "Governance incentives marketplace for DeFi protocols",
       href: "https://quest.paladin.vote/",
       logo: "/images/ecosystem/paladin.png",
+    },
+    balancer: {
+      title: "Balancer",
+      subtitle: "Programmable liquidity protocol for DeFi",
+      href: "https://balancer.fi/pools/arbitrum/v3/0x483bc7fe92fc392305dd97d4d3363e0e0a7f144d",
+      logo: "/images/ecosystem/balancer.svg",
+    },
+    spectra: {
+      title: "Spectra",
+      subtitle: "Interest rate derivatives and yield trading protocol",
+      href: "https://app.spectra.finance/pools/arb:0xdbfdad05d2d280195331582516813358f41d1cc4",
+      logo: "/images/ecosystem/spectra.jpeg",
     },
   };
 
