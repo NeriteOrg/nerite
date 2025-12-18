@@ -18,7 +18,8 @@ export type EcosystemPartnerId =
   | "summerstone"
   | "octane"
   | "sherlock"
-  | "pooltogether";
+  | "pooltogether"
+  | "flowstate";
 
 const COLLATERAL_INFO: Record<CollateralSymbol, { name: string; url: string }> = {
   "ETH": { name: "Ethereum", url: "https://ethereum.org/" },
@@ -115,6 +116,12 @@ export function EcosystemPartnerSummary({
       subtitle: "No-loss prize savings protocol",
       href: "https://pooltogether.com/",
       logo: "/images/ecosystem/pooltogether.jpeg",
+    },
+    flowstate: {
+      title: "Flow State",
+      subtitle: "Streaming funding for sustaining & rewarding impact work",
+      href: "https://flowstate.network/",
+      logo: "/images/ecosystem/flowstate.png",
     },
   };
 
