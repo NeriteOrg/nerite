@@ -31,6 +31,7 @@ export function EcosystemScreen() {
     "paladin",
     "balancer",
     "spectra",
+    "privacypools",
   ];
 
   const partnersTransition = useTransition(

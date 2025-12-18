@@ -22,7 +22,8 @@ export type EcosystemPartnerId =
   | "flowstate"
   | "paladin"
   | "balancer"
-  | "spectra";
+  | "spectra"
+  | "privacypools";
 
 const COLLATERAL_INFO: Record<CollateralSymbol, { name: string; url: string }> = {
   "ETH": { name: "Ethereum", url: "https://ethereum.org/" },
@@ -143,6 +144,12 @@ export function EcosystemPartnerSummary({
       subtitle: "Interest rate derivatives and yield trading protocol",
       href: "https://app.spectra.finance/pools/arb:0xdbfdad05d2d280195331582516813358f41d1cc4",
       logo: "/images/ecosystem/spectra.jpeg",
+    },
+    privacypools: {
+      title: "Privacy Pools",
+      subtitle: "Compliant private transactions on Ethereum",
+      href: "https://privacypools.com/",
+      logo: "/images/ecosystem/privacypools.png",
     },
   };
 
