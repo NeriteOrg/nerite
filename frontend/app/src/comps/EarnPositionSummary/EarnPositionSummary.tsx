@@ -41,9 +41,15 @@ export function EarnPositionSummary({
   let prevShare = dn.from(0, 18);
   if (totalPoolDeposit && dn.gt(totalPoolDeposit, 0)) {
     if (earnPosition) {
-      const posDeposit = txPreviewMode && prevEarnPosition ? dn.add(prevEarnPosition.deposit, earnPosition.deposit) : earnPosition.deposit;
-      const total = txPreviewMode ? dn.add(totalPoolDeposit, earnPosition.deposit) : totalPoolDeposit;
-      share = dn.div(posDeposit, total);
+      // Calculate the deposit difference (how much is being added/removed)
+      const depositDiff = prevEarnPosition
+        ? dn.sub(earnPosition.deposit, prevEarnPosition.deposit)
+        : earnPosition.deposit;
+      // In preview mode, add the difference to get the new total pool size
+      const total = txPreviewMode
+        ? dn.add(totalPoolDeposit, depositDiff)
+        : totalPoolDeposit;
+      share = dn.div(earnPosition.deposit, total);
     }
     if (prevEarnPosition) {
       prevShare = dn.div(prevEarnPosition.deposit, totalPoolDeposit);
