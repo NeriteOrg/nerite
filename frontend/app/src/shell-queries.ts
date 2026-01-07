@@ -32,6 +32,23 @@ export async function graphQuery<TResult, TVariables>(
   return result.data as TResult;
 }
 
+export const AllocationsQuery = graphql(`
+  query Allocations {
+    allocations(
+      orderBy: shells__balance
+      orderDirection: desc
+    ) {
+      user
+      shells {
+        balance
+      }
+      activities {
+        label
+      }
+    }
+  }
+`)
+
 export const BalancesByTokenQuery = graphql(`
   query BalancesByToken($token: Bytes!) {
     balances(
