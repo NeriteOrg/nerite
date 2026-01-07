@@ -4839,6 +4839,11 @@ export enum _SubgraphErrorPolicy_ {
   Deny = 'deny'
 }
 
+export type AllocationsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type AllocationsQuery = { __typename?: 'Query', allocations: Array<{ __typename?: 'Allocation', user: string, shells: { __typename?: 'Shell', balance: bigint }, activities: Array<{ __typename?: 'Activity', label: string }> }> };
+
 export type BalancesByTokenQueryVariables = Exact<{
   token: Scalars['Bytes']['input'];
 }>;
@@ -4873,6 +4878,19 @@ export class TypedDocumentString<TResult, TVariables>
   }
 }
 
+export const AllocationsDocument = new TypedDocumentString(`
+    query Allocations {
+  allocations(orderBy: shells__balance, orderDirection: desc) {
+    user
+    shells {
+      balance
+    }
+    activities {
+      label
+    }
+  }
+}
+    `) as unknown as TypedDocumentString<AllocationsQuery, AllocationsQueryVariables>;
 export const BalancesByTokenDocument = new TypedDocumentString(`
     query BalancesByToken($token: Bytes!) {
   balances(where: {token: $token}, orderBy: balance, orderDirection: desc) {

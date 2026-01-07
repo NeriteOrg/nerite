@@ -15,14 +15,20 @@ import * as types from './graphql';
  * Learn more about it here: https://the-guild.dev/graphql/codegen/plugins/presets/preset-client#reducing-bundle-size
  */
 type Documents = {
+    "\n  query Allocations {\n    allocations(\n      orderBy: shells__balance\n      orderDirection: desc\n    ) {\n      user\n      shells {\n        balance\n      }\n      activities {\n        label\n      }\n    }\n  }\n": typeof types.AllocationsDocument,
     "\n  query BalancesByToken($token: Bytes!) {\n    balances(\n      where: { token: $token }\n      orderBy: balance\n      orderDirection: desc\n    ) {\n      holder\n      token\n      balance\n    }\n  }\n": typeof types.BalancesByTokenDocument,
     "\n  query BalancesForHolders($token: Bytes!, $holders: [Bytes!]!) {\n    balances(\n      where: {\n        token_not: $token\n        holder_in: $holders\n      }\n    ) {\n      holder\n      token\n      balance\n    }\n  }\n": typeof types.BalancesForHoldersDocument,
 };
 const documents: Documents = {
+    "\n  query Allocations {\n    allocations(\n      orderBy: shells__balance\n      orderDirection: desc\n    ) {\n      user\n      shells {\n        balance\n      }\n      activities {\n        label\n      }\n    }\n  }\n": types.AllocationsDocument,
     "\n  query BalancesByToken($token: Bytes!) {\n    balances(\n      where: { token: $token }\n      orderBy: balance\n      orderDirection: desc\n    ) {\n      holder\n      token\n      balance\n    }\n  }\n": types.BalancesByTokenDocument,
     "\n  query BalancesForHolders($token: Bytes!, $holders: [Bytes!]!) {\n    balances(\n      where: {\n        token_not: $token\n        holder_in: $holders\n      }\n    ) {\n      holder\n      token\n      balance\n    }\n  }\n": types.BalancesForHoldersDocument,
 };
 
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  query Allocations {\n    allocations(\n      orderBy: shells__balance\n      orderDirection: desc\n    ) {\n      user\n      shells {\n        balance\n      }\n      activities {\n        label\n      }\n    }\n  }\n"): typeof import('./graphql').AllocationsDocument;
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */

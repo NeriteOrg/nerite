@@ -4,6 +4,7 @@ import { DATA_REFRESH_INTERVAL } from "@/src/constants";
 import { useQuery } from "@tanstack/react-query";
 import {
   graphQuery,
+  AllocationsQuery,
   BalancesByTokenQuery,
   BalancesForHoldersQuery,
 } from "./shell-queries";
@@ -25,6 +26,19 @@ function prepareOptions(options?: Options) {
     refetchInterval: DATA_REFRESH_INTERVAL,
     ...options,
   };
+}
+
+export function useAllocations(
+  options?: Options,
+) {
+  return useQuery({
+    queryKey: ["Allocations"],
+    queryFn: async () => {
+      const { allocations } = await graphQuery(AllocationsQuery);
+      return allocations;
+    },
+    ...prepareOptions(options),
+  });
 }
 
 export function useShellBalances(
