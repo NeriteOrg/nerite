@@ -17,9 +17,15 @@ import {
   IconEarn,
   IconStake as IconStream,
   IconStake as IconEcosystem,
+  TokenIcon,
   // IconLeverage,
   // IconStake,
 } from "@liquity2/uikit";
+
+// NERI token icon wrapper for menu
+function IconNeri() {
+  return <TokenIcon symbol="NERI" size={24} />;
+}
 import Link from "next/link";
 import { AccountButton } from "./AccountButton";
 import { Menu } from "./Menu";
@@ -34,6 +40,7 @@ const menuItems: ComponentProps<typeof Menu>["menuItems"] = [
   // [content.menu.multiply, "/multiply", IconLeverage, "multiply"],
   [content.menu.earn, "/earn", IconEarn, "earn", "_self"],
   [content.menu.ecosystem, "/ecosystem", IconEcosystem, "ecosystem", "_self"],
+  [content.menu.claim, "/neri", IconNeri, "neri", "_self"],
   [content.menu.stream, "https://app.superfluid.org/", IconStream, "stream", "_blank"],
   // [content.menu.stake, "/stake", IconStake, "stake"],
   // [content.menu.buy, buyPageUrl, IconStake, "buy", buyPageTarget],

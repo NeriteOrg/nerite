@@ -8,7 +8,7 @@ import {
   BalancesByTokenQuery,
   BalancesForHoldersQuery,
 } from "./shell-queries";
-import { CONTRACT_SHELL_TOKEN } from "./env";
+import { CONTRACT_SHELL_TOKEN, SHELL_SUBGRAPH_URL } from "./env";
 import { getUniswapPositionsByOwners, PoolKey } from "./uniswap-hooks";
 import { readContracts } from "@wagmi/core";
 import { useWagmiConfig } from "@/src/services/Arbitrum";
@@ -118,6 +118,82 @@ export function useShellActivitiesOfHolders(
       })));
     },
     enabled: Boolean(holders && holders.length > 0),
+    ...prepareOptions(options),
+  });
+}
+
+export function useWeightedActivitySnapshots(
+  user?: Address,
+  options?: Options,
+) {
+  return useQuery({
+    queryKey: ["WeightedActivitySnapshots", user],
+    queryFn: async () => {
+      const response = await fetch(SHELL_SUBGRAPH_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          query: `
+            query WeightedActivitySnapshots($user: Bytes!) {
+              weightedActivitySnapshots(
+                where: { user: $user }
+                orderBy: blockTimestamp
+                orderDirection: desc
+              ) {
+                id
+                user
+                activityLabel
+                baseValue
+                weight
+                weightedValue
+                multiplier
+                blockTimestamp
+              }
+            }
+          `,
+          variables: { user: user?.toLowerCase() },
+        }),
+      });
+      const result = await response.json();
+      return result.data?.weightedActivitySnapshots ?? [];
+    },
+    enabled: Boolean(user),
+    ...prepareOptions(options),
+  });
+}
+
+export function usePrivacyPoolSnapshots(
+  user?: Address,
+  options?: Options,
+) {
+  return useQuery({
+    queryKey: ["PrivacyPoolSnapshots", user],
+    queryFn: async () => {
+      const response = await fetch(SHELL_SUBGRAPH_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          query: `
+            query PrivacyPoolSnapshots($user: Bytes!) {
+              privacyPoolSnapshots(
+                where: { user: $user }
+                orderBy: blockTimestamp
+                orderDirection: desc
+              ) {
+                id
+                user
+                depositValue
+                blockTimestamp
+              }
+            }
+          `,
+          variables: { user: user?.toLowerCase() },
+        }),
+      });
+      const result = await response.json();
+      return result.data?.privacyPoolSnapshots ?? [];
+    },
+    enabled: Boolean(user),
     ...prepareOptions(options),
   });
 }
