@@ -8,7 +8,7 @@ import { a, useSpring, useTrail } from "@react-spring/web";
 import { Button, VFlex, ShellpointIcon, TokenIcon } from "@liquity2/uikit";
 import { useState, useMemo, useEffect } from "react";
 import { useBalance } from "@/src/wagmi-utils";
-import { useShellActivitiesOfHolders, useWeightedActivitySnapshots, usePrivacyPoolSnapshots } from "@/src/shell-hooks";
+import { useShellActivitiesOfHolders, useWeightedActivitySnapshots, usePrivacyPoolSnapshots, useTotalShells, useNeriTotalSupply, calculateNeriAllocation } from "@/src/shell-hooks";
 import { CONTRACT_ADDRESSES } from "@/src/contracts";
 import { getAddress, isAddress, isAddressEqual } from "viem";
 import { getEnsAddress, normalize } from "viem/ens";
@@ -149,6 +149,19 @@ export function ClaimScreen() {
   // Fetch privacy pool snapshots (GoSlow NFT)
   const { data: privacyPoolSnapshots } = usePrivacyPoolSnapshots(lookupAddress);
 
+  // Fetch total shells for NERI calculation
+  const { data: totalShells } = useTotalShells();
+
+  // Fetch NERI total supply from contract
+  const { data: neriTotalSupply } = useNeriTotalSupply();
+
+  // Calculate NERI allocation based on user's shell balance, total shells, and NERI supply
+  const neriAllocation = useMemo(() => {
+    if (!shellBalance || !totalShells || totalShells === 0n || !neriTotalSupply) return 0n;
+    const userShells = shellBalance[0];
+    return calculateNeriAllocation(userShells, totalShells, neriTotalSupply);
+  }, [shellBalance, totalShells, neriTotalSupply]);
+
   // Get aggregated stats from weighted snapshots
   const activityStats = useMemo(() => {
     if (!weightedSnapshots || weightedSnapshots.length === 0) return null;
@@ -241,10 +254,10 @@ export function ClaimScreen() {
     config: { mass: 1, tension: 80, friction: 30 },
   });
 
-  // NERI amount animation (proportional to shells - placeholder conversion)
+  // NERI amount animation
   const neriAmountSpring = useSpring({
     from: { number: 0 },
-    to: { number: revealed && shellBalance ? Number(format(shellBalance, 0).replace(/,/g, '')) * 0.1 : 0 },
+    to: { number: revealed && neriAllocation ? Number(neriAllocation / 10n ** 18n) : 0 },
     delay: revealed ? 400 : 0,
     config: { mass: 1, tension: 80, friction: 30 },
   });

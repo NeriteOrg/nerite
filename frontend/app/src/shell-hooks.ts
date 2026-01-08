@@ -17,6 +17,12 @@ import { UniswapV4PositionManager } from "./abi/UniswapV4PositionManager";
 import { Abi } from "abitype";
 import { isAddressEqual, zeroAddress } from "viem";
 
+
+// NERI Airdrop Configuration
+export const NERI_CONFIG = {
+  SHELL_ALLOCATION_PERCENT: 10,
+};
+
 type Options = {
   refetchInterval?: number;
 };
@@ -196,4 +202,63 @@ export function usePrivacyPoolSnapshots(
     enabled: Boolean(user),
     ...prepareOptions(options),
   });
+}
+
+// Get total shells across all holders
+export function useTotalShells(options?: Options) {
+  const { data: allBalances, ...rest } = useShellBalances(options);
+
+  const totalShells = allBalances?.reduce((sum, balance) => {
+    return sum + BigInt(balance.balance);
+  }, 0n) ?? 0n;
+
+  return {
+    data: totalShells,
+    ...rest,
+  };
+}
+
+// Hook to get NERI total supply from contract
+export function useNeriTotalSupply(options?: Options) {
+  const config = useWagmiConfig();
+
+  return useQuery({
+    queryKey: ["NeriTotalSupply"],
+    queryFn: async () => {
+      const result = await readContracts(config, {
+        allowFailure: false,
+        contracts: [{
+          address: CONTRACT_ADDRESSES.NeriToken as `0x${string}`,
+          abi: [{
+            name: "totalSupply",
+            type: "function",
+            stateMutability: "view",
+            inputs: [],
+            outputs: [{ type: "uint256" }],
+          }] as const,
+          functionName: "totalSupply",
+          args: [],
+        }],
+      });
+      return result[0] as bigint;
+    },
+    // Don't fetch if NERI token address is not set (zero address)
+    enabled: CONTRACT_ADDRESSES.NeriToken !== "0x0000000000000000000000000000000000000000",
+    ...prepareOptions(options),
+  });
+}
+
+// Calculate NERI amount for a given shell balance
+export function calculateNeriAllocation(
+  userShells: bigint,
+  totalShells: bigint,
+  neriTotalSupply: bigint
+): bigint {
+  if (totalShells === 0n || neriTotalSupply === 0n) return 0n;
+
+  // NERI allocated to shell holders = neriTotalSupply * SHELL_ALLOCATION_PERCENT / 100
+  const neriForShells = neriTotalSupply * BigInt(NERI_CONFIG.SHELL_ALLOCATION_PERCENT) / 100n;
+
+  // User's NERI = (userShells / totalShells) * neriForShells
+  return (userShells * neriForShells) / totalShells;
 }
