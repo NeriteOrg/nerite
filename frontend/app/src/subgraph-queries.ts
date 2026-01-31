@@ -299,3 +299,37 @@ export const GovernanceUserAllocated = graphql(`
     }
   }
 `);
+
+export const AllActiveTrovesQuery = graphql(`
+  query AllActiveTroves(
+    $first: Int!
+    $skip: Int!
+    $orderBy: Trove_orderBy
+    $orderDirection: OrderDirection
+  ) {
+    troves(
+      where: { status: active }
+      first: $first
+      skip: $skip
+      orderBy: $orderBy
+      orderDirection: $orderDirection
+    ) {
+      id
+      troveId
+      borrower
+      debt
+      deposit
+      interestRate
+      updatedAt
+      createdAt
+      collateral {
+        collIndex
+        minCollRatio
+        token {
+          symbol
+          name
+        }
+      }
+    }
+  }
+`);

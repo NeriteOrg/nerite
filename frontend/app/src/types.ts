@@ -161,3 +161,18 @@ export type Initiative =
 export type Vote = "for" | "against";
 export type VoteAllocation = { vote: Vote | null; value: Dnum };
 export type VoteAllocations = Record<Address, VoteAllocation>;
+
+export type TroveExplorerItem = {
+  id: string;
+  troveId: TroveId;
+  borrower: Address;
+  collateralSymbol: CollateralSymbol;
+  collateralName: string;
+  collIndex: CollIndex;
+  borrowed: Dnum;
+  deposit: Dnum;
+  minCollRatio: bigint;
+  interestRate: Dnum;
+  updatedAt: number;
+  createdAt: number;
+};

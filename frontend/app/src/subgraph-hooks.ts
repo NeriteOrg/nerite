@@ -1,9 +1,19 @@
 import type {
+  AllActiveTrovesQuery as AllActiveTrovesQueryType,
   InterestBatchQuery as InterestBatchQueryType,
   StabilityPoolDepositQuery as StabilityPoolDepositQueryType,
   TrovesByAccountQuery as TrovesByAccountQueryType,
 } from "@/src/graphql/graphql";
-import type { Address, CollIndex, Delegate, PositionEarn, PositionLoanCommitted, PrefixedTroveId } from "@/src/types";
+import type {
+  Address,
+  CollateralSymbol,
+  CollIndex,
+  Delegate,
+  PositionEarn,
+  PositionLoanCommitted,
+  PrefixedTroveId,
+  TroveExplorerItem,
+} from "@/src/types";
 
 import { DATA_REFRESH_INTERVAL } from "@/src/constants";
 import { ACCOUNT_POSITIONS } from "@/src/demo-mode";
@@ -16,6 +26,7 @@ import { useQuery } from "@tanstack/react-query";
 import * as dn from "dnum";
 import { useCallback } from "react";
 import {
+  AllActiveTrovesQuery,
   AllInterestRateBracketsQuery,
   BorrowerInfoQuery,
   GovernanceInitiatives,
@@ -544,4 +555,66 @@ function subgraphStabilityPoolDepositToEarnPosition(
       coll: dnum18(0),
     },
   };
+}
+
+function subgraphTroveToTroveExplorerItem(
+  trove: AllActiveTrovesQueryType["troves"][number],
+): TroveExplorerItem {
+  if (!isTroveId(trove.troveId)) {
+    throw new Error(`Invalid trove ID: ${trove.id} / ${trove.troveId}`);
+  }
+
+  const collIndex = trove.collateral.collIndex;
+  if (!isCollIndex(collIndex)) {
+    throw new Error(`Invalid collateral index: ${collIndex}`);
+  }
+
+  if (!isAddress(trove.borrower)) {
+    throw new Error(`Invalid borrower: ${trove.borrower}`);
+  }
+
+  return {
+    id: trove.id,
+    troveId: trove.troveId,
+    borrower: trove.borrower,
+    collateralSymbol: trove.collateral.token.symbol as CollateralSymbol,
+    collateralName: trove.collateral.token.name,
+    collIndex,
+    borrowed: dnum18(trove.debt),
+    deposit: dnum18(trove.deposit),
+    minCollRatio: trove.collateral.minCollRatio,
+    interestRate: dnum18(trove.interestRate),
+    updatedAt: Number(trove.updatedAt) * 1000,
+    createdAt: Number(trove.createdAt) * 1000,
+  };
+}
+
+export function useAllActiveTroves(
+  first: number = 100,
+  skip: number = 0,
+  orderBy: string = "debt",
+  orderDirection: "asc" | "desc" = "desc",
+  options?: Options,
+) {
+  let queryFn = async () => {
+    const { troves } = await graphQuery(AllActiveTrovesQuery, {
+      first,
+      skip,
+      orderBy: orderBy as any,
+      orderDirection,
+    });
+    return troves.map(subgraphTroveToTroveExplorerItem);
+  };
+
+  if (DEMO_MODE) {
+    queryFn = async () => {
+      return [];
+    };
+  }
+
+  return useQuery({
+    queryKey: ["AllActiveTroves", first, skip, orderBy, orderDirection],
+    queryFn,
+    ...prepareOptions(options),
+  });
 }
