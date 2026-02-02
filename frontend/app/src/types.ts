@@ -1,4 +1,5 @@
-import type { Address, CollateralSymbol, Token, TokenSymbol } from "@liquity2/uikit";
+import type { Address, CollateralSymbol, CollateralToken, Token, TokenSymbol } from "@liquity2/uikit";
+import type { CollateralContracts } from "@/src/contracts";
 import type { Dnum } from "dnum";
 import type { ReactNode } from "react";
 
@@ -6,12 +7,17 @@ export type { Address, CollateralSymbol, Dnum, Token, TokenSymbol };
 
 export type RiskLevel = "low" | "medium" | "high";
 
-export type CollIndex = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9;
+export type CollIndex = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7;
 export type TroveId = `0x${string}`;
 export type PrefixedTroveId = `${CollIndex}:${TroveId}`;
 
+export type Branch = CollateralToken & {
+  id: CollIndex;
+  contracts: CollateralContracts;
+};
+
 export function isCollIndex(value: unknown): value is CollIndex {
-  return typeof value === "number" && value >= 0 && value <= 9;
+  return typeof value === "number" && value >= 0 && value <= 7;
 }
 
 export function isTroveId(value: unknown): value is TroveId {
@@ -89,7 +95,7 @@ export type PositionEarn = {
   collIndex: CollIndex;
   deposit: Dnum;
   rewards: {
-    bold: Dnum;
+    usnd: Dnum;
     coll: Dnum;
   };
 };
@@ -106,7 +112,14 @@ export type PositionStake = {
   };
 };
 
-export type Position = PositionLoan | PositionEarn | PositionStake;
+export type PositionYusnd = {
+  type: "yusnd";
+  usnd: Dnum;
+  owner: Address;
+  yusnd: Dnum;
+};
+
+export type Position = PositionLoan | PositionEarn | PositionStake | PositionYusnd;
 
 export type Delegate = {
   address: Address;
@@ -161,3 +174,108 @@ export type Initiative =
 export type Vote = "for" | "against";
 export type VoteAllocation = { vote: Vote | null; value: Dnum };
 export type VoteAllocations = Record<Address, VoteAllocation>;
+
+export interface CombinedTroveData {
+  id: bigint;
+  entireDebt: bigint;
+  entireColl: bigint;
+  redistBoldDebtGain: bigint;
+  redistCollGain: bigint;
+  accruedInterest: bigint;
+  recordedDebt: bigint;
+  annualInterestRate: bigint;
+  accruedBatchManagementFee: bigint;
+  lastInterestRateAdjTime: bigint;
+  stake: bigint;
+  lastDebtUpdateTime: bigint;
+  interestBatchManager: Address;
+  batchDebtShares: bigint;
+  snapshotETH: bigint;
+  snapshotBoldDebt: bigint;
+}
+
+export interface ReturnCombinedTroveReadCallData {
+  id: string;
+  troveId: string;
+  borrower: Address;
+  debt: bigint;
+  deposit: bigint;
+  interestRate: bigint;
+  status: TroveStatus;
+  collateral: {
+    id: string;
+    token: {
+      symbol: string;
+      name: string;
+    };
+    minCollRatio: number;
+    collIndex: number;
+  }
+  interestBatch: {
+    annualInterestRate: bigint;
+    batchManager: Address;
+  }
+  entireDebt: bigint;
+  entireColl: bigint;
+  redistBoldDebtGain: bigint;
+  redistCollGain: bigint;
+  accruedInterest: bigint;
+  recordedDebt: bigint;
+  annualInterestRate: bigint;
+  accruedBatchManagementFee: bigint;
+  lastInterestRateAdjTime: bigint;
+  stake: bigint;
+  lastDebtUpdateTime: bigint;
+  interestBatchManager: Address;
+  batchDebtShares: bigint;
+  snapshotETH: bigint;
+  snapshotBoldDebt: bigint;
+}
+
+export type DebtPerInterestRate = {
+  interestBatchManager: Address;
+  interestRate: bigint;
+  debt: bigint;
+}
+
+export enum TroveStatus {
+  nonExistent,
+  active,
+  closedByOwner,
+  closedByLiquidation,
+  zombie
+}
+
+export interface Trove {
+  debt: bigint;
+  coll: bigint;
+  stake: bigint;
+  status: TroveStatus;
+  arrayIndex: bigint;
+  lastDebtUpdateTime: bigint;
+  lastInterestRateAdjTime: bigint;
+  annualInterestRate: bigint;
+  interestBatchManager: Address;
+  batchDebtShares: bigint;
+}
+
+export interface ReturnTroveReadCallData extends Trove {
+  id: string;
+  troveId: string;
+  borrower: Address;
+  deposit: bigint;
+  interestRate: bigint;
+  collateral: {
+    id: string;
+    token: {
+      symbol: string;
+      name: string;
+    };
+    minCollRatio: number;
+    collIndex: number;
+  }
+  interestBatch: {
+    annualInterestRate: bigint;
+    batchManager: Address;
+  }
+}

@@ -5,25 +5,24 @@ import { a, useSpring } from "@react-spring/web";
 import Link from "next/link";
 import { useState } from "react";
 import { match } from "ts-pattern";
-import { ActionIcon } from "./ActionIcon";
+// import { ActionIcon } from "./ActionIcon";
+import { ActionIcon } from "./SnailIcon";
+import { BUY_PAGE_URL } from "@/src/env";
 
 export function ActionCard({
   type,
 }: {
-  type: "borrow" | "multiply" | "earn" | "stake";
+  type: "borrow" | "multiply" | "earn" | "buy" | "stream";
 }) {
   const [hint, setHint] = useState(false);
   const [active, setActive] = useState(false);
 
   const hintSpring = useSpring({
-    transform: active
-      ? "scale(1.01)"
-      : hint
-      ? "scale(1.02)"
-      : "scale(1)",
-    boxShadow: hint && !active
-      ? "0 2px 4px rgba(0, 0, 0, 0.1)"
-      : "0 2px 4px rgba(0, 0, 0, 0)",
+    transform: active ? "scale(1.01)" : hint ? "scale(1.02)" : "scale(1)",
+    boxShadow:
+      hint && !active
+        ? "0 2px 4px rgba(0, 0, 0, 0.1)"
+        : "0 2px 4px rgba(0, 0, 0, 0)",
     immediate: active,
     config: {
       mass: 1,
@@ -64,15 +63,25 @@ export function ActionCard({
       path: "/earn",
       title: ac.earn.title,
     }))
-    .with("stake", () => ({
+    .with("buy", () => ({
       colors: {
         background: token("colors.brandGolden"),
         foreground: token("colors.brandGoldenContent"),
         foregroundAlt: token("colors.brandGoldenContentAlt"),
       },
-      description: ac.stake.description,
-      path: "/stake",
-      title: ac.stake.title,
+      description: ac.buy.description,
+      path: BUY_PAGE_URL ?? "/buy",
+      title: ac.buy.title,
+    }))
+    .with("stream", () => ({
+      colors: {
+        background: token("colors.brandGreen"),
+        foreground: token("colors.brandBlueContent"),
+        foregroundAlt: token("colors.brandBlueContentAlt"),
+      },
+      description: ac.stream.description,
+      path: "https://app.superfluid.org/",
+      title: ac.stream.title,
     }))
     .exhaustive();
 
@@ -92,8 +101,9 @@ export function ActionCard({
           color: "gray:50",
           outline: 0,
           userSelect: "none",
-        }),
+        })
       )}
+      target={path.startsWith("http") ? "_blank" : undefined}
     >
       <a.section
         className={css({

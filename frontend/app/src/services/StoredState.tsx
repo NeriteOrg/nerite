@@ -22,6 +22,7 @@ export const StoredStateSchema = v.object({
     v.literal("approve-amount"),
     v.literal("approve-infinite"),
   ]),
+  onboardingDismissed: v.optional(v.boolean()),
 });
 
 type StoredStateType = v.InferOutput<typeof StoredStateSchema>;
@@ -29,6 +30,7 @@ type StoredStateType = v.InferOutput<typeof StoredStateSchema>;
 const defaultState: StoredStateType = {
   loanModes: {},
   preferredApproveMethod: "permit",
+  onboardingDismissed: false,
 };
 
 type StoredStateContext = StoredStateType & {
