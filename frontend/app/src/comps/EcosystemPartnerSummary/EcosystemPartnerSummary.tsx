@@ -279,13 +279,14 @@ export function EcosystemPartnerSummaryBase({
             {title}
           </div>
           <div
+            style={{ WebkitBoxOrient: "vertical" }}
             className={css({
               fontSize: 13,
               lineHeight: 1.3,
               color: "token(colors.contentAlt)",
               display: "-webkit-box",
               WebkitLineClamp: 2,
-              WebkitBoxOrient: "vertical",
+              // WebkitBoxOrient: "vertical",
               overflow: "hidden",
             })}
           >
