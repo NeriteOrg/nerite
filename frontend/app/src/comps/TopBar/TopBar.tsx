@@ -5,12 +5,20 @@ import type { ComponentProps } from "react";
 import { Logo } from "@/src/comps/Logo/Logo";
 import { Tag } from "@/src/comps/Tag/Tag";
 import content from "@/src/content";
-import { DEPLOYMENT_FLAVOR } from "@/src/env";
+import {
+  // BUY_PAGE_URL, 
+  DEPLOYMENT_FLAVOR,
+  DISABLE_TRANSACTIONS
+} from "@/src/env";
 import { css } from "@/styled-system/css";
 import { IconBorrow, IconDashboard, IconEarn, IconLeverage, IconSearch, IconStake } from "@liquity2/uikit";
 import Link from "next/link";
 import { AccountButton } from "./AccountButton";
 import { Menu } from "./Menu";
+import { ShellpointsButton } from "./ShellpointsButton";
+
+// const buyPageUrl = BUY_PAGE_URL ?? "/buy";
+// const buyPageTarget = BUY_PAGE_URL ? "_blank" : "_self";
 
 const menuItems: ComponentProps<typeof Menu>["menuItems"] = [
   [content.menu.dashboard, "/", IconDashboard],
@@ -23,6 +31,8 @@ const menuItems: ComponentProps<typeof Menu>["menuItems"] = [
 
 export function TopBar() {
   return (
+    <>
+    {DISABLE_TRANSACTIONS && (<Banner />)}
     <div
       className={css({
         position: "relative",
@@ -47,7 +57,7 @@ export function TopBar() {
         })}
       >
         <Link
-          href="/"
+          href='/'
           className={css({
             position: "relative",
             display: "flex",
@@ -88,7 +98,7 @@ export function TopBar() {
                 })}
               >
                 <Tag
-                  size="mini"
+                  size='mini'
                   css={{
                     color: "accentContent",
                     background: "brandCoral",
@@ -103,7 +113,64 @@ export function TopBar() {
           </div>
         </Link>
         <Menu menuItems={menuItems} />
-        <AccountButton />
+        <div className={css({
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "flex-end",
+          gap: 16,
+        })}>
+          <div className={css({
+            position: "absolute",
+            top: 72,
+            right: 0,
+          })}>
+            <ShellpointsButton />
+          </div>
+          <AccountButton />
+        </div>
+      </div>
+    </div>
+    </>
+  );
+}
+
+
+export function Banner() {
+  return (
+    <div
+      className={css({
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        maxWidth: "100%",
+        width: "100%",
+        height: 40,
+        textAlign: "center",
+        color: "#fff",
+        background: "red",
+        padding: 16,
+      })}
+    >
+      <div
+        className={css({
+          width: "100%",
+          maxWidth: 1092,
+          paddingY: 16,
+        })}
+      >
+        Due to concerns of a widespread supply-chain attack, we are taking the extra precation of disabling transactions at the moment. They will be re-enabled tomorrow.
+        {/* Banner content goes here. Here is a{" "} */}
+        {/* <Link
+          href="https://example.com"
+          passHref
+          legacyBehavior
+        >
+          <AnchorTextButton
+            external
+            label="link example"
+            className={css({ color: "inherit" })}
+          />
+        </Link>. */}
       </div>
     </div>
   );

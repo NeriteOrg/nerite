@@ -74,11 +74,89 @@ export const FullTroveQueryFragment = graphql(`
   }
 `);
 
+export const TrovesQuery = graphql(`
+  query Troves {
+    troves(
+      orderBy: updatedAt
+      orderDirection: desc
+    ) {
+      id
+      borrower
+      closedAt
+      createdAt
+      debt
+      deposit
+      interestRate
+      mightBeLeveraged
+      stake
+      status
+      troveId
+      updatedAt
+      collateral {
+        id
+        token {
+          symbol
+          name
+        }
+        minCollRatio
+        collIndex
+      }
+      interestBatch {
+        id
+        annualInterestRate
+        annualManagementFee
+        batchManager
+      }
+    }
+  }
+`);
+
 export const TrovesByAccountQuery = graphql(`
   query TrovesByAccount($account: Bytes!) {
     troves(
       where: {
         borrower: $account,
+        status_in: [active,redeemed,liquidated],
+      }
+      orderBy: updatedAt
+      orderDirection: desc
+    ) {
+      id
+      borrower
+      closedAt
+      createdAt
+      debt
+      deposit
+      interestRate
+      mightBeLeveraged
+      stake
+      status
+      troveId
+      updatedAt
+      collateral {
+        id
+        token {
+          symbol
+          name
+        }
+        minCollRatio
+        collIndex
+      }
+      interestBatch {
+        id
+        annualInterestRate
+        annualManagementFee
+        batchManager
+      }
+    }
+  }
+`);
+
+export const TrovesByAccountsQuery = graphql(`
+  query TrovesByAccounts($accounts: [Bytes!]!) {
+    troves(
+      where: {
+        borrower_in: $accounts,
         status_in: [active,redeemed,liquidated],
       }
       orderBy: updatedAt
@@ -170,7 +248,6 @@ export const StabilityPoolDepositQueryFragment = graphql(`
       B
       P
       S
-      epoch
       scale
     }
   }
@@ -189,7 +266,6 @@ export const StabilityPoolDepositsByAccountQuery = graphql(`
         B
         P
         S
-        epoch
         scale
       }
     }
@@ -209,16 +285,15 @@ export const StabilityPoolDepositQuery = graphql(`
         B
         P
         S
-        epoch
         scale
       }
     }
   }
 `);
 
-export const StabilityPoolEpochScaleQuery = graphql(`
-  query StabilityPoolEpochScale($id: ID!) {
-    stabilityPoolEpochScale(id: $id) {
+export const StabilityPoolScaleQuery = graphql(`
+  query StabilityPoolScale($id: ID!) {
+    stabilityPoolScale(id: $id) {
       id
       B
       S
@@ -292,44 +367,10 @@ export const GovernanceStats = graphql(`
   }
 `);
 
-export const GovernanceUserAllocated = graphql(`
+export const GovernanceUserAllocations = graphql(`
   query GovernanceUserAllocations($id: ID!) {
     governanceUser(id: $id) {
       allocated
-    }
-  }
-`);
-
-export const AllActiveTrovesQuery = graphql(`
-  query AllActiveTroves(
-    $first: Int!
-    $skip: Int!
-    $orderBy: Trove_orderBy
-    $orderDirection: OrderDirection
-  ) {
-    troves(
-      where: { status: active }
-      first: $first
-      skip: $skip
-      orderBy: $orderBy
-      orderDirection: $orderDirection
-    ) {
-      id
-      troveId
-      borrower
-      debt
-      deposit
-      interestRate
-      updatedAt
-      createdAt
-      collateral {
-        collIndex
-        minCollRatio
-        token {
-          symbol
-          name
-        }
-      }
     }
   }
 `);

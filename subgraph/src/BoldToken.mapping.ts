@@ -6,7 +6,12 @@ import { BorrowerOperations as BorrowerOperationsContract } from "../generated/B
 import { CollateralRegistry as CollateralRegistryContract } from "../generated/BoldToken/CollateralRegistry";
 import { ERC20 as ERC20Contract } from "../generated/BoldToken/ERC20";
 import { TroveManager as TroveManagerContract } from "../generated/BoldToken/TroveManager";
-import { Collateral, CollateralAddresses, StabilityPoolEpochScale, Token } from "../generated/schema";
+import {
+  Collateral, 
+  CollateralAddresses, 
+  // StabilityPoolEpochScale, 
+  Token
+} from "../generated/schema";
 import {
   StabilityPool as StabilityPoolTemplate,
   TroveManager as TroveManagerTemplate,
@@ -42,20 +47,23 @@ function addCollateral(
   addresses.token = tokenAddress;
   addresses.troveManager = troveManagerAddress;
   addresses.troveNft = troveManagerContract.troveNFT();
+  
+  // Add debt limit to the collateral (Nerite specific)
+  collateral.debtLimit = troveManagerContract.debtLimit();
 
   collateral.minCollRatio = BorrowerOperationsContract.bind(
     Address.fromBytes(addresses.borrowerOperations),
   ).MCR();
 
   // initial collId + epoch + scale => S
-  let spEpochScale = new StabilityPoolEpochScale(collId + ":0:0");
-  spEpochScale.B = BigInt.fromI32(0);
-  spEpochScale.S = BigInt.fromI32(0);
+  // let spEpochScale = new StabilityPoolEpochScale(collId + ":0:0");
+  // spEpochScale.B = BigInt.fromI32(0);
+  // spEpochScale.S = BigInt.fromI32(0);
 
   collateral.save();
   token.save();
   addresses.save();
-  spEpochScale.save();
+  // spEpochScale.save();
 
   let context = new DataSourceContext();
   context.setBytes("address:borrowerOperations", addresses.borrowerOperations);
