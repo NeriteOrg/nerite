@@ -1,8 +1,18 @@
 import type {
+  AllActiveTrovesQuery as AllActiveTrovesQueryType,
   InterestBatchQuery as InterestBatchQueryType,
   TrovesByAccountQuery as TrovesByAccountQueryType,
 } from "@/src/graphql/graphql";
-import type { Address, CollIndex, Delegate, PositionEarn, PositionLoanCommitted, PrefixedTroveId, ReturnCombinedTroveReadCallData, ReturnTroveReadCallData } from "@/src/types";
+import type {
+  Address,
+  CollateralSymbol,
+  CollIndex,
+  Delegate,
+  PositionEarn,
+  PositionLoanCommitted,
+  PrefixedTroveId,
+  TroveExplorerItem,
+} from "@/src/types";
 
 import { DATA_REFRESH_INTERVAL } from "@/src/constants";
 import { ACCOUNT_POSITIONS } from "@/src/demo-mode";
@@ -15,6 +25,7 @@ import { useQuery } from "@tanstack/react-query";
 import * as dn from "dnum";
 import { useCallback } from "react";
 import {
+  AllActiveTrovesQuery,
   AllInterestRateBracketsQuery,
   BorrowerInfoQuery,
   GovernanceInitiatives,

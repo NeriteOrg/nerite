@@ -12,6 +12,7 @@ export default {
     dashboard: "Dashboard",
     borrow: "Borrow",
     multiply: "Multiply",
+    troves: "Troves",
     earn: "Earn",
     stake: "Stake",
     buy: "Buy USND",
