@@ -163,6 +163,7 @@ export const CONTRACT_ADDRESSES = {
   WETH: CONTRACT_WETH,
   YUSND: CONTRACT_YUSND,
   ShellToken: CONTRACT_SHELL_TOKEN,
+  NeriToken: "0x0000000000000000000000000000000000000000", // TODO: Replace with actual NERI token address
   GoSlowNft: "0x6da3c02293c96dfa5747b1739ebb492619222a8a",
 
   strategies: {

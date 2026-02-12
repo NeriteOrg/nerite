@@ -17,6 +17,7 @@ export default {
     buy: "Buy USND",
     stream: "Stream",
     ecosystem: "Ecosystem",
+    claim: "NERI",
   },
 
   accountButton: {

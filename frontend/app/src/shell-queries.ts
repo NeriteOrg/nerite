@@ -77,3 +77,6 @@ export const BalancesForHoldersQuery = graphql(`
     }
   }
 `)
+
+// Note: WeightedActivitySnapshots and PrivacyPoolSnapshots queries are
+// executed via raw fetch in shell-hooks.ts since they're not in the codegen schema

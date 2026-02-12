@@ -89,49 +89,50 @@ export function Screen({
     },
   });
 
-  const headingElt = typeof heading === "object"
-      && heading !== null
-      && "title" in heading
-      && !isValidElement(heading)
-    ? (
-      <header
-        className={css({
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
-          gap: 12,
-          paddingBottom: 8,
-        })}
-      >
-        <h1
+  const headingElt = heading === null
+    ? null
+    : typeof heading === "object"
+        && "title" in heading
+        && !isValidElement(heading)
+      ? (
+        <header
           className={css({
             display: "flex",
+            flexDirection: "column",
             alignItems: "center",
             justifyContent: "center",
-            fontSize: 28,
+            gap: 12,
+            paddingBottom: 8,
           })}
         >
-          {heading.title}
-        </h1>
-        {heading.subtitle && (
-          <div
+          <h1
             className={css({
-              maxWidth: 540,
-              textAlign: "center",
-              color: "contentAlt",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              fontSize: 28,
             })}
           >
-            {heading.subtitle}
-          </div>
-        )}
-      </header>
-    )
-    : (
-      <div style={{ width }}>
-        {heading}
-      </div>
-    );
+            {heading.title}
+          </h1>
+          {heading.subtitle && (
+            <div
+              className={css({
+                maxWidth: 540,
+                textAlign: "center",
+                color: "contentAlt",
+              })}
+            >
+              {heading.subtitle}
+            </div>
+          )}
+        </header>
+      )
+      : (
+        <div style={{ width }}>
+          {heading}
+        </div>
+      );
 
   return (
     <div
