@@ -30,6 +30,7 @@ export function EcosystemScreen() {
     "flowstate",
     "paladin",
     "balancer",
+    "aura",
     "spectra",
     "privacypools",
   ];

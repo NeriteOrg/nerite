@@ -23,7 +23,8 @@ export type EcosystemPartnerId =
   | "paladin"
   | "balancer"
   | "spectra"
-  | "privacypools";
+  | "privacypools"
+  | "aura";
 
 const COLLATERAL_INFO: Record<CollateralSymbol, { name: string; url: string }> = {
   "ETH": { name: "Ethereum", url: "https://ethereum.org/" },
@@ -89,7 +90,7 @@ export function EcosystemPartnerSummary({
       title: COLLATERAL_INFO.TBTC.name,
       subtitle: "Decentralized bridge for Bitcoin to Ethereum",
       href: COLLATERAL_INFO.TBTC.url,
-      symbol: "TBTC",
+      logo: "/images/ecosystem/tbtc.png",
     },
     liquity: {
       title: "Liquity",
@@ -151,6 +152,12 @@ export function EcosystemPartnerSummary({
       href: "https://privacypools.com/",
       logo: "/images/ecosystem/privacypools.png",
     },
+    aura: {
+      title: "Aura Finance",
+      subtitle: "DeFi's Yield & Liquidity Hub powered by Balancer",
+      href: "https://aura.finance/",
+      logo: "/images/ecosystem/aura.png",
+    },
   };
 
   const partner = partnerContent[partnerId];
@@ -194,13 +201,12 @@ export function EcosystemPartnerSummaryBase({
         display: "flex",
         flexDirection: "column",
         justifyContent: "space-between",
-        padding: "12px 16px",
+        padding: 16,
         borderRadius: 8,
         borderWidth: 1,
         borderStyle: "solid",
         width: "100%",
-        height: "100%",
-        minHeight: 160,
+        height: 140,
         userSelect: "none",
         borderColor: "token(colors.infoSurfaceBorder)",
         background: "token(colors.infoSurface)",
@@ -211,9 +217,7 @@ export function EcosystemPartnerSummaryBase({
         className={css({
           display: "flex",
           alignItems: "start",
-          gap: 16,
-          paddingBottom: 12,
-          borderBottom: "1px solid token(colors.infoSurfaceBorder)",
+          gap: 12,
         })}
       >
         <div
@@ -226,8 +230,8 @@ export function EcosystemPartnerSummaryBase({
           {logo ? (
             <div
               className={css({
-                width: 34,
-                height: 34,
+                width: 40,
+                height: 40,
                 position: "relative",
                 borderRadius: "50%",
                 overflow: "hidden",
@@ -236,18 +240,18 @@ export function EcosystemPartnerSummaryBase({
               <Image
                 src={logo}
                 alt={String(title)}
-                width={34}
-                height={34}
+                width={40}
+                height={40}
                 style={{ objectFit: "contain" }}
               />
             </div>
           ) : symbol ? (
-            <TokenIcon symbol={symbol} size={34} />
+            <TokenIcon symbol={symbol} size={40} />
           ) : (
             <div
               className={css({
-                width: 34,
-                height: 34,
+                width: 40,
+                height: 40,
                 borderRadius: "50%",
                 background: "token(colors.secondary)",
               })}
@@ -258,39 +262,43 @@ export function EcosystemPartnerSummaryBase({
           className={css({
             flexGrow: 1,
             display: "flex",
-            justifyContent: "space-between",
+            flexDirection: "column",
+            gap: 4,
+            minWidth: 0,
           })}
         >
           <div
             className={css({
-              display: "flex",
-              flexDirection: "column",
+              fontSize: 16,
+              fontWeight: 500,
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
             })}
           >
-            <div>{title}</div>
-            <div
-              className={css({
-                display: "flex",
-                gap: 4,
-                fontSize: 14,
-                color: "token(colors.contentAlt)",
-              })}
-            >
-              {subtitle}
-            </div>
+            {title}
+          </div>
+          <div
+            style={{ WebkitBoxOrient: "vertical" }}
+            className={css({
+              fontSize: 13,
+              lineHeight: 1.3,
+              color: "token(colors.contentAlt)",
+              display: "-webkit-box",
+              WebkitLineClamp: 2,
+              // WebkitBoxOrient: "vertical",
+              overflow: "hidden",
+            })}
+          >
+            {subtitle}
           </div>
         </div>
       </div>
       <div
         className={css({
-          position: "relative",
           display: "flex",
-          gap: 32,
           alignItems: "center",
-          justifyContent: "space-between",
-          paddingTop: 12,
-          height: 56,
-          fontSize: 14,
+          justifyContent: "flex-end",
         })}
       >
         {action && (
@@ -320,50 +328,28 @@ function OpenLink({
       href={href}
       target={target}
       className={css({
-        position: "absolute",
-        inset: "0 -16px -12px auto",
-        display: "grid",
-        placeItems: {
-          base: "end center",
-          large: "center",
-        },
-        padding: {
-          base: "16px 12px",
-          large: "0 12px 0 24px",
-        },
-        borderRadius: 8,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        width: 34,
+        height: 34,
+        borderRadius: "50%",
+        color: "accentContent",
+        background: "accent",
+        transition: "all 80ms",
         _focusVisible: {
           outline: "2px solid token(colors.focused)",
-          outlineOffset: -2,
-        },
-        _active: {
-          translate: "0 1px",
-        },
-
-        "& > div": {
-          transformOrigin: "50% 50%",
-          transition: "scale 80ms",
+          outlineOffset: 2,
         },
         _hover: {
-          "& > div": {
-            scale: 1.05,
-          },
+          transform: "scale(1.05)",
+        },
+        _active: {
+          transform: "scale(0.98) translateY(1px)",
         },
       })}
     >
-      <div
-        className={css({
-          display: "grid",
-          placeItems: "center",
-          width: 34,
-          height: 34,
-          color: "accentContent",
-          background: "accent",
-          borderRadius: "50%",
-        })}
-      >
-        <IconExternal size={24} />
-      </div>
+      <IconExternal size={20} />
     </Link>
   );
 }

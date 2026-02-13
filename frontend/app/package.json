@@ -6,7 +6,7 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "build": "pnpm build-deps && next build",
+    "build": "pnpm build-uikit && pnpm build-banner && pnpm build-panda && next build",
     "build-analyze": "ANALYZE=true pnpm build",
     "build-banner": "test -f ./Banner.tsx || cp ./Banner.example.tsx ./Banner.tsx",
     "build-deps": "pnpm build-graphql && pnpm build-uikit && pnpm build-banner && pnpm build-panda",
