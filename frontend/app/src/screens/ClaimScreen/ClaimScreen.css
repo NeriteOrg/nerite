@@ -1,0 +1,71 @@
+/* Floating snail animation */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px) rotate(-3deg);
+  }
+  50% {
+    transform: translateY(-15px) rotate(3deg);
+  }
+}
+
+.floating-snail {
+  position: absolute;
+  animation: float ease-in-out infinite;
+}
+
+/* Hero snail float animation */
+.hero-snail {
+  position: relative;
+  animation: float 4s ease-in-out infinite;
+}
+
+/* Sparkle animation */
+@keyframes sparkle {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.5;
+    transform: scale(1.2);
+  }
+}
+
+.sparkle {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  background: linear-gradient(135deg, #FFD700, #FFA500);
+  border-radius: 50%;
+  animation: sparkle ease-in-out infinite;
+}
+
+/* Confetti falling animation */
+@keyframes confetti-fall {
+  0% {
+    transform: translateY(-100vh) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(100vh) rotate(720deg);
+    opacity: 0;
+  }
+}
+
+.confetti-piece {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  animation: confetti-fall linear forwards;
+}
+
+/* NERI amount gradient text */
+.neri-amount {
+  font-size: 36px;
+  font-weight: 700;
+  background: linear-gradient(135deg, #FFD700 0%, #FFA500 50%, #FF8C00 100%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
