@@ -3,7 +3,7 @@ import type { TroveExplorerItem } from "@/src/types";
 import { AddressLink } from "@/src/comps/AddressLink/AddressLink";
 import { Amount } from "@/src/comps/Amount/Amount";
 import { getLiquidationPrice, getLtv } from "@/src/liquity-math";
-import { useCollPrice } from "@/src/services/Prices";
+import { usePrice } from "@/src/services/Prices";
 import { css } from "@/styled-system/css";
 import { TokenIcon } from "@liquity2/uikit";
 import * as dn from "dnum";
@@ -13,7 +13,7 @@ type Props = {
 };
 
 export function TroveRow({ trove }: Props) {
-  const collPrice = useCollPrice(trove.collateralSymbol);
+  const collPrice = usePrice(trove.collateralSymbol);
 
   const collateralValue = collPrice.data
     ? dn.mul(trove.deposit, collPrice.data)
