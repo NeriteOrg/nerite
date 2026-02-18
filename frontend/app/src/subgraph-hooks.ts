@@ -1,5 +1,4 @@
 import type {
-  AllActiveTrovesQuery as AllActiveTrovesQueryType,
   InterestBatchQuery as InterestBatchQueryType,
   TrovesByAccountQuery as TrovesByAccountQueryType,
 } from "@/src/graphql/graphql";
@@ -11,6 +10,8 @@ import type {
   PositionEarn,
   PositionLoanCommitted,
   PrefixedTroveId,
+  ReturnCombinedTroveReadCallData,
+  ReturnTroveReadCallData,
   TroveExplorerItem,
 } from "@/src/types";
 
@@ -25,7 +26,6 @@ import { useQuery } from "@tanstack/react-query";
 import * as dn from "dnum";
 import { useCallback } from "react";
 import {
-  AllActiveTrovesQuery,
   AllInterestRateBracketsQuery,
   BorrowerInfoQuery,
   GovernanceInitiatives,
@@ -642,6 +642,120 @@ export function useTroveCount(options?: Options) {
 
   return useQuery({
     queryKey: ["TroveCount"],
+    queryFn,
+    ...prepareOptions(options),
+  });
+}
+
+export function useAllActiveTroves(
+  pageSize: number,
+  skip: number,
+  orderBy: string,
+  orderDirection: "asc" | "desc",
+  options?: Options,
+) {
+  const fieldMap: Record<string, string> = {
+    debt: "debt",
+    deposit: "deposit",
+    interestRate: "interestRate",
+    collateral: "collateral",
+  };
+  const subgraphOrderBy = fieldMap[orderBy] ?? "debt";
+
+  let queryFn = async (): Promise<TroveExplorerItem[]> => {
+    const query = `
+      query AllActiveTroves($first: Int!, $skip: Int!) {
+        troves(
+          where: { status: active }
+          first: $first
+          skip: $skip
+          orderBy: ${subgraphOrderBy}
+          orderDirection: ${orderDirection}
+        ) {
+          id
+          borrower
+          createdAt
+          debt
+          deposit
+          interestRate
+          troveId
+          updatedAt
+          collateral {
+            collIndex
+            minCollRatio
+            token {
+              symbol
+              name
+            }
+          }
+          interestBatch {
+            annualInterestRate
+          }
+        }
+      }
+    `;
+
+    const response = await fetch(SUBGRAPH_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/graphql-response+json",
+      },
+      body: JSON.stringify({
+        query,
+        variables: {
+          first: pageSize,
+          skip,
+        },
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error("Error while fetching active troves from the subgraph");
+    }
+
+    const result = await response.json();
+    if (!result.data) {
+      throw new Error("Invalid response from the subgraph");
+    }
+
+    return result.data.troves.map((trove: {
+      id: string;
+      borrower: string;
+      createdAt: string;
+      debt: string;
+      deposit: string;
+      interestRate: string;
+      troveId: string;
+      updatedAt: string;
+      collateral: {
+        collIndex: number;
+        minCollRatio: string;
+        token: { symbol: string; name: string };
+      };
+      interestBatch: { annualInterestRate: string } | null;
+    }): TroveExplorerItem => ({
+      id: trove.id,
+      troveId: trove.troveId as TroveExplorerItem["troveId"],
+      borrower: trove.borrower as Address,
+      collateralSymbol: trove.collateral.token.symbol as CollateralSymbol,
+      collateralName: trove.collateral.token.name,
+      collIndex: trove.collateral.collIndex as CollIndex,
+      borrowed: dnum18(BigInt(trove.debt)),
+      deposit: dnum18(BigInt(trove.deposit)),
+      minCollRatio: BigInt(trove.collateral.minCollRatio),
+      interestRate: dnum18(BigInt(trove.interestBatch?.annualInterestRate ?? trove.interestRate)),
+      updatedAt: Number(trove.updatedAt) * 1000,
+      createdAt: Number(trove.createdAt) * 1000,
+    }));
+  };
+
+  if (DEMO_MODE) {
+    queryFn = async () => [];
+  }
+
+  return useQuery({
+    queryKey: ["AllActiveTroves", pageSize, skip, orderBy, orderDirection],
     queryFn,
     ...prepareOptions(options),
   });
