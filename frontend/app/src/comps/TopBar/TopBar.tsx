@@ -11,7 +11,16 @@ import {
   DISABLE_TRANSACTIONS
 } from "@/src/env";
 import { css } from "@/styled-system/css";
-import { IconBorrow, IconDashboard, IconEarn, IconLeverage, IconSearch, IconStake } from "@liquity2/uikit";
+import {
+  IconBorrow,
+  IconDashboard,
+  IconEarn,
+  IconStake as IconStream,
+  IconStake as IconEcosystem,
+  IconSearch,
+  // IconLeverage,
+  // IconStake,
+} from "@liquity2/uikit";
 import Link from "next/link";
 import { AccountButton } from "./AccountButton";
 import { Menu } from "./Menu";
@@ -21,12 +30,15 @@ import { ShellpointsButton } from "./ShellpointsButton";
 // const buyPageTarget = BUY_PAGE_URL ? "_blank" : "_self";
 
 const menuItems: ComponentProps<typeof Menu>["menuItems"] = [
-  [content.menu.dashboard, "/", IconDashboard],
-  [content.menu.borrow, "/borrow", IconBorrow],
-  [content.menu.multiply, "/multiply", IconLeverage],
-  [content.menu.troves, "/troves", IconSearch],
-  [content.menu.earn, "/earn", IconEarn],
-  [content.menu.stake, "/stake", IconStake],
+  [content.menu.dashboard, "/", IconDashboard, "dashboard", "_self"],
+  [content.menu.borrow, "/borrow", IconBorrow, "borrow", "_self"],
+  // [content.menu.multiply, "/multiply", IconLeverage, "multiply"],
+  [content.menu.troves, "/troves", IconSearch, "troves", "_self"],
+  [content.menu.earn, "/earn", IconEarn, "earn", "_self"],
+  [content.menu.ecosystem, "/ecosystem", IconEcosystem, "ecosystem", "_self"],
+  [content.menu.stream, "https://app.superfluid.org/", IconStream, "stream", "_blank"],
+  // [content.menu.stake, "/stake", IconStake, "stake"],
+  // [content.menu.buy, buyPageUrl, IconStake, "buy", buyPageTarget],
 ];
 
 export function TopBar() {

@@ -25,8 +25,8 @@ export function Menu({
     string,
     string,
     ComponentType<{}>,
-    MenuItemType?,
-    HrefTarget?
+    MenuItemType,
+    HrefTarget
   ][];
 }) {
   const pathname = usePathname();
