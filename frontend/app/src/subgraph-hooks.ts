@@ -665,7 +665,7 @@ export function useAllActiveTroves(
     const query = `
       query AllActiveTroves($first: Int!, $skip: Int!) {
         troves(
-          where: { status_not: zombie }
+          where: { debt_gt: "0" }
           first: $first
           skip: $skip
           orderBy: ${subgraphOrderBy}
