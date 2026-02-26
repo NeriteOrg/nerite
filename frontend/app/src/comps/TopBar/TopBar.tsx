@@ -17,7 +17,7 @@ import {
   IconEarn,
   IconStake as IconStream,
   IconStake as IconEcosystem,
-  IconSearch,
+  // IconSearch,
   // IconLeverage,
   // IconStake,
 } from "@liquity2/uikit";
