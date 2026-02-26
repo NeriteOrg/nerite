@@ -665,7 +665,7 @@ export function useAllActiveTroves(
     const query = `
       query AllActiveTroves($first: Int!, $skip: Int!) {
         troves(
-          where: { status: active }
+          where: { status_not: zombie }
           first: $first
           skip: $skip
           orderBy: ${subgraphOrderBy}
@@ -677,6 +677,7 @@ export function useAllActiveTroves(
           debt
           deposit
           interestRate
+          status
           troveId
           updatedAt
           collateral {
@@ -725,6 +726,7 @@ export function useAllActiveTroves(
       debt: string;
       deposit: string;
       interestRate: string;
+      status: string;
       troveId: string;
       updatedAt: string;
       collateral: {
@@ -744,6 +746,7 @@ export function useAllActiveTroves(
       deposit: dnum18(BigInt(trove.deposit)),
       minCollRatio: BigInt(trove.collateral.minCollRatio),
       interestRate: dnum18(BigInt(trove.interestBatch?.annualInterestRate ?? trove.interestRate)),
+      status: trove.status,
       updatedAt: Number(trove.updatedAt) * 1000,
       createdAt: Number(trove.createdAt) * 1000,
     }));

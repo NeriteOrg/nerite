@@ -186,6 +186,7 @@ export type TroveExplorerItem = {
   deposit: Dnum;
   minCollRatio: bigint;
   interestRate: Dnum;
+  status: string;
   updatedAt: number;
   createdAt: number;
 };

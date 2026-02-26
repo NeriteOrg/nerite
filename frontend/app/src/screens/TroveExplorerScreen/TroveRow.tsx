@@ -29,8 +29,40 @@ export function TroveRow({ trove }: Props) {
     ? getLtv(trove.deposit, trove.borrowed, collPrice.data)
     : null;
 
+  const statusLabel: Record<string, string> = {
+    active: "Active",
+    closed: "Closed",
+    closedByOwner: "Closed",
+    liquidated: "Liquidated",
+    redeemed: "Redeemed",
+  };
+
+  const statusColor: Record<string, string> = {
+    active: "#16a34a",
+    closed: "#6b7280",
+    closedByOwner: "#6b7280",
+    liquidated: "#dc2626",
+    redeemed: "#d97706",
+  };
+
   return (
     <tr>
+      <td>
+        <span
+          className={css({
+            fontSize: 12,
+            fontWeight: 500,
+            padding: "2px 8px",
+            borderRadius: 999,
+          })}
+          style={{
+            color: statusColor[trove.status] ?? "#6b7280",
+            background: `${statusColor[trove.status] ?? "#6b7280"}18`,
+          }}
+        >
+          {statusLabel[trove.status] ?? trove.status}
+        </span>
+      </td>
       <td>
         <div
           className={css({

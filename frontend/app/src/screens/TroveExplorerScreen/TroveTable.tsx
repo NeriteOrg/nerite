@@ -168,6 +168,7 @@ export function TroveTable({
     >
       <thead>
         <tr>
+          <SortableHeader field="status" label="Status" />
           <SortableHeader field="deposit" label="Collateral" />
           <SortableHeader field="debt" label="USND Borrowed" />
           <SortableHeader field="collateralValue" label="Collateral Value" />

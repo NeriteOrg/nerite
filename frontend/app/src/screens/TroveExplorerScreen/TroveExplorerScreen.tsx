@@ -13,7 +13,7 @@ export function TroveExplorerScreen() {
   const [orderBy, setOrderBy] = useState<string>("debt");
   const [orderDirection, setOrderDirection] = useState<"asc" | "desc">("desc");
   const [currentPage, setCurrentPage] = useState(0);
-  const pageSize = 200; // fetch all troves (currently ~35 active)
+  const pageSize = 500; // fetch all troves (~222 total)
 
   // For subgraph-sortable fields, pass sort params to the query
   // For computed fields (collateralValue, liqPrice, ltv), fetch all and sort client-side
