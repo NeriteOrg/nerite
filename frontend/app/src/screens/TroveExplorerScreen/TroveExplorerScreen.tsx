@@ -6,17 +6,24 @@ import { css } from "@/styled-system/css";
 import { useState } from "react";
 import { TroveTable } from "./TroveTable";
 
+// Subgraph-sortable fields vs client-side computed fields
+const SUBGRAPH_SORTABLE = new Set(["debt", "deposit", "interestRate"]);
+
 export function TroveExplorerScreen() {
   const [orderBy, setOrderBy] = useState<string>("debt");
   const [orderDirection, setOrderDirection] = useState<"asc" | "desc">("desc");
   const [currentPage, setCurrentPage] = useState(0);
-  const pageSize = 50;
+  const pageSize = 200; // fetch all troves (currently ~35 active)
+
+  // For subgraph-sortable fields, pass sort params to the query
+  // For computed fields (collateralValue, liqPrice, ltv), fetch all and sort client-side
+  const isSubgraphSort = SUBGRAPH_SORTABLE.has(orderBy);
 
   const { data: troves, isLoading } = useAllActiveTroves(
     pageSize,
-    currentPage * pageSize,
-    orderBy,
-    orderDirection,
+    isSubgraphSort ? currentPage * pageSize : 0,
+    isSubgraphSort ? orderBy : "debt",
+    isSubgraphSort ? orderDirection : "desc",
   );
 
   const handleSort = (field: string) => {
@@ -26,16 +33,17 @@ export function TroveExplorerScreen() {
       setOrderBy(field);
       setOrderDirection("desc");
     }
+    setCurrentPage(0);
   };
 
   const hasPrevPage = currentPage > 0;
-  const hasNextPage = troves && troves.length === pageSize;
+  const hasNextPage = isSubgraphSort && troves && troves.length === pageSize;
 
   return (
     <Screen
       heading={{
         title: "Trove Explorer",
-        subtitle: "Explore all active troves in the Liquity V2 protocol",
+        subtitle: "Explore all active troves on Nerite",
       }}
       width={1200}
     >

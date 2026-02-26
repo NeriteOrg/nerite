@@ -658,7 +658,6 @@ export function useAllActiveTroves(
     debt: "debt",
     deposit: "deposit",
     interestRate: "interestRate",
-    collateral: "collateral",
   };
   const subgraphOrderBy = fieldMap[orderBy] ?? "debt";
 
