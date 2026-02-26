@@ -14,6 +14,7 @@ export type MenuItemType =
   | 'buy'
   | 'stream'
   | 'ecosystem'
+  | 'troves'
   // | 'stake';
 
 export type HrefTarget = '_self' | '_blank';
