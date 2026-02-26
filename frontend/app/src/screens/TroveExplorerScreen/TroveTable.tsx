@@ -18,26 +18,28 @@ type Props = {
 // Client-side sortable fields (computed from prices)
 const CLIENT_SORT_FIELDS = new Set(["collateralValue", "liqPrice", "ltv"]);
 
-function useTrovePrices(troves: TroveExplorerItem[]) {
-  // Get unique collateral symbols
-  const symbols = useMemo(
-    () => [...new Set(troves.map((t) => t.collateralSymbol))],
-    [troves],
-  );
+function useAllPrices() {
+  // Always call usePrice for every symbol — hook count is constant
+  const eth = usePrice("ETH");
+  const wsteth = usePrice("WSTETH");
+  const reth = usePrice("RETH");
+  const rseth = usePrice("RSETH");
+  const weeth = usePrice("WEETH");
+  const arb = usePrice("ARB");
+  const comp = usePrice("COMP");
+  const tbtc = usePrice("TBTC");
 
-  // Fetch prices for all collateral types
-  const priceQueries = symbols.map((s) => ({
-    symbol: s,
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    query: usePrice(s),
-  }));
-
-  const priceMap = new Map<string, readonly [bigint, number] | null>();
-  for (const { symbol, query } of priceQueries) {
-    priceMap.set(symbol, query.data ?? null);
-  }
-
-  return priceMap;
+  return useMemo(() => {
+    const map = new Map<string, readonly [bigint, number] | null>();
+    const queries = [
+      ["ETH", eth], ["WSTETH", wsteth], ["RETH", reth], ["RSETH", rseth],
+      ["WEETH", weeth], ["ARB", arb], ["COMP", comp], ["TBTC", tbtc],
+    ] as const;
+    for (const [sym, q] of queries) {
+      map.set(sym, q.data ?? null);
+    }
+    return map;
+  }, [eth.data, wsteth.data, reth.data, rseth.data, weeth.data, arb.data, comp.data, tbtc.data]);
 }
 
 export function TroveTable({
@@ -47,7 +49,7 @@ export function TroveTable({
   orderDirection,
   onSort,
 }: Props) {
-  const priceMap = useTrovePrices(troves);
+  const priceMap = useAllPrices();
 
   // Client-side sort for computed fields
   const sortedTroves = useMemo(() => {
@@ -125,7 +127,7 @@ export function TroveTable({
           color: "contentAlt",
         })}
       >
-        No active troves found
+        No troves found
       </div>
     );
   }
