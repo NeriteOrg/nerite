@@ -33,7 +33,7 @@ const menuItems: ComponentProps<typeof Menu>["menuItems"] = [
   [content.menu.dashboard, "/", IconDashboard, "dashboard", "_self"],
   [content.menu.borrow, "/borrow", IconBorrow, "borrow", "_self"],
   // [content.menu.multiply, "/multiply", IconLeverage, "multiply"],
-  [content.menu.troves, "/troves", IconSearch, "troves", "_self"],
+  // [content.menu.troves, "/troves", IconSearch, "troves", "_self"],
   [content.menu.earn, "/earn", IconEarn, "earn", "_self"],
   [content.menu.ecosystem, "/ecosystem", IconEcosystem, "ecosystem", "_self"],
   [content.menu.stream, "https://app.superfluid.org/", IconStream, "stream", "_blank"],

@@ -21,7 +21,7 @@ import { dnum18 } from "@/src/dnum-utils";
 import { DEMO_MODE, SUBGRAPH_URL } from "@/src/env";
 import { isCollIndex, isPositionLoanCommitted, isPrefixedtroveId, isTroveId, TroveStatus } from "@/src/types";
 import { sleep } from "@/src/utils";
-import { isAddress, shortenAddress } from "@liquity2/uikit";
+import { COLLATERALS, isAddress, shortenAddress } from "@liquity2/uikit";
 import { useQuery } from "@tanstack/react-query";
 import * as dn from "dnum";
 import { useCallback } from "react";
@@ -738,7 +738,7 @@ export function useAllActiveTroves(
       id: trove.id,
       troveId: trove.troveId as TroveExplorerItem["troveId"],
       borrower: trove.borrower as Address,
-      collateralSymbol: trove.collateral.token.symbol as CollateralSymbol,
+      collateralSymbol: COLLATERALS[trove.collateral.collIndex]?.symbol ?? trove.collateral.token.symbol.toUpperCase() as CollateralSymbol,
       collateralName: trove.collateral.token.name,
       collIndex: trove.collateral.collIndex as CollIndex,
       borrowed: dnum18(BigInt(trove.debt)),
