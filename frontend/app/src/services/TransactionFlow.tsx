@@ -548,19 +548,29 @@ function useFlowManager(account: Address | null, isSafe: boolean = false) {
           error: null,
         });
       } catch (error) {
+        const insufficientFunds = error instanceof Error
+          && /insufficient funds for gas/i.test(error.message);
+
         updateFlowStep(stepIndex, {
           status: "error",
           artifact: currentArtifact,
-          error:
-            error instanceof Error
-              ? {
-                  name:
-                    error.name.toLowerCase().trim() === "error"
-                      ? null
-                      : error.name,
-                  message: error.message,
-                }
-              : { name: null, message: String(error) },
+          error: insufficientFunds
+            ? {
+                name: null,
+                message:
+                  "You don't have enough ETH in your wallet to cover the gas"
+                  + " deposit and transaction fees. Please add more ETH and try"
+                  + " again.",
+              }
+            : error instanceof Error
+            ? {
+                name:
+                  error.name.toLowerCase().trim() === "error"
+                    ? null
+                    : error.name,
+                message: error.message,
+              }
+            : { name: null, message: String(error) },
         });
         console.error(`Error at step ${stepIndex}:`, error);
       } finally {

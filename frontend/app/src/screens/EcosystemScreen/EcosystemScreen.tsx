@@ -21,7 +21,6 @@ export function EcosystemScreen() {
     "weeth",
     "arb",
     "comp",
-    "rseth",
     "liquity",
     "summerstone",
     "octane",
@@ -30,6 +29,7 @@ export function EcosystemScreen() {
     "flowstate",
     "paladin",
     "balancer",
+    "aura",
     "spectra",
     "privacypools",
   ];
