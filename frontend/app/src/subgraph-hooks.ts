@@ -697,7 +697,7 @@ export function useAllActiveTroves(
     const query = `
       query AllActiveTroves($first: Int!, $skip: Int!) {
         troves(
-          where: { status: active }
+          where: { status_in: [active, redeemed] }
           first: $first
           skip: $skip
           orderBy: updatedAt
@@ -794,6 +794,10 @@ export function useAllActiveTroves(
       );
 
       if (!liveTrove) {
+        return [];
+      }
+
+      if (trove.status === "redeemed" && liveTrove.entireDebt === 0n) {
         return [];
       }
 
