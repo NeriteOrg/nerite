@@ -759,7 +759,9 @@ export function useTrovesWithCurrentDebt(options?: Options) {
         deposit: dnum18(latestTrove.deposit),
         minCollRatio: BigInt(trove.collateral.minCollRatio),
         interestRate: dnum18(latestTrove.interestRate),
-        status: enumToLoanStatus(latestTrove.status),
+        status: latestTrove.status === TroveStatus.zombie
+          ? "zombie"
+          : enumToLoanStatus(latestTrove.status),
         updatedAt: Number(trove.updatedAt) * 1000,
         createdAt: Number(trove.createdAt) * 1000,
       }];
