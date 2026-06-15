@@ -15,6 +15,7 @@ import type { UseQueryResult } from "@tanstack/react-query";
 import type { Config as WagmiConfig } from "wagmi";
 
 import { DATA_REFRESH_INTERVAL, INTEREST_RATE_INCREMENT, INTEREST_RATE_MAX, INTEREST_RATE_MIN } from "@/src/constants";
+import { isVisibleCollateralSymbol } from "@/src/collateral-visibility";
 import { getCollateralContract, getCollateralContracts, getContracts, getProtocolContract } from "@/src/contracts";
 import { dnum18, dnumOrNull, jsonStringifyWithDnum } from "@/src/dnum-utils";
 import { CHAIN_BLOCK_EXPLORER, COLLATERAL_CONTRACTS, LIQUITY_STATS_URL } from "@/src/env";
@@ -331,7 +332,9 @@ export function useEarnPositionsByAccount(account: null | Address) {
         return null;
       }
 
-      const branches = COLLATERAL_CONTRACTS;
+      const branches = COLLATERAL_CONTRACTS.filter(({ symbol }) => (
+        isVisibleCollateralSymbol(symbol)
+      ));
 
       const depositsPerBranch = await Promise.all(
         branches.map(async (branch) => {
@@ -899,19 +902,24 @@ export function useLatestTroveData(collIndex: CollIndex, troveId: TroveId) {
   });
 }
 
-export function useLoanLiveDebt(collIndex: CollIndex, troveId: TroveId) {
+export function useLoanLiveTroveData(collIndex: CollIndex, troveId: TroveId) {
   const latestTroveData = useLatestTroveData(collIndex, troveId);
   return {
     ...latestTroveData,
-    data: latestTroveData.data?.entireDebt ?? null,
+    data: latestTroveData.data
+      ? {
+        borrowed: latestTroveData.data.entireDebt,
+        deposit: latestTroveData.data.entireColl,
+      }
+      : null,
   };
 }
 
 export function useLoan(collIndex: CollIndex, troveId: TroveId): UseQueryResult<PositionLoanCommitted | null> {
-  const liveDebt = useLoanLiveDebt(collIndex, troveId);
+  const liveTroveData = useLoanLiveTroveData(collIndex, troveId);
   const loan = useLoanById(getPrefixedTroveId(collIndex, troveId));
 
-  if (liveDebt.status === "pending" || loan.status === "pending") {
+  if (liveTroveData.status === "pending" || loan.status === "pending") {
     return {
       ...loan,
       data: undefined,
@@ -936,7 +944,12 @@ export function useLoan(collIndex: CollIndex, troveId: TroveId): UseQueryResult<
     ...loan,
     data: {
       ...loan.data,
-      borrowed: liveDebt.data ? dnum18(liveDebt.data) : loan.data.borrowed,
+      borrowed: liveTroveData.data
+        ? dnum18(liveTroveData.data.borrowed)
+        : loan.data.borrowed,
+      deposit: liveTroveData.data
+        ? dnum18(liveTroveData.data.deposit)
+        : loan.data.deposit,
     },
   };
 }

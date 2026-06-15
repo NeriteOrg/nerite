@@ -15,6 +15,7 @@ import type {
   TroveExplorerItem,
 } from "@/src/types";
 
+import { isVisibleCollIndex, isVisibleCollateralSymbol } from "@/src/collateral-visibility";
 import { DATA_REFRESH_INTERVAL } from "@/src/constants";
 import { ACCOUNT_POSITIONS } from "@/src/demo-mode";
 import { dnum18 } from "@/src/dnum-utils";
@@ -251,19 +252,24 @@ export function useStabilityPoolDeposits(
       StabilityPoolDepositsByAccountQuery,
       { account: account.toLowerCase() },
     );
-    return stabilityPoolDeposits.map((deposit) => ({
-      id: `${deposit.collateral.collIndex}:${account}`.toLowerCase(),
-      collateral: deposit.collateral,
-      deposit: BigInt(deposit.deposit),
-      depositor: account.toLowerCase(),
-      snapshot: {
-        B: BigInt(deposit.snapshot.B),
-        P: BigInt(deposit.snapshot.P),
-        S: BigInt(deposit.snapshot.S),
-        // epoch: BigInt(deposit.snapshot.epoch),
-        scale: BigInt(deposit.snapshot.scale),
-      },
-    }));
+    return stabilityPoolDeposits
+      .filter((deposit) => (
+        isCollIndex(deposit.collateral.collIndex)
+        && isVisibleCollIndex(deposit.collateral.collIndex)
+      ))
+      .map((deposit) => ({
+        id: `${deposit.collateral.collIndex}:${account}`.toLowerCase(),
+        collateral: deposit.collateral,
+        deposit: BigInt(deposit.deposit),
+        depositor: account.toLowerCase(),
+        snapshot: {
+          B: BigInt(deposit.snapshot.B),
+          P: BigInt(deposit.snapshot.P),
+          S: BigInt(deposit.snapshot.S),
+          // epoch: BigInt(deposit.snapshot.epoch),
+          scale: BigInt(deposit.snapshot.scale),
+        },
+      }));
   };
 
   if (DEMO_MODE) {
@@ -271,6 +277,7 @@ export function useStabilityPoolDeposits(
       if (!account) return [];
       return ACCOUNT_POSITIONS
         .filter((position) => position.type === "earn")
+        .filter((position) => isVisibleCollIndex(position.collIndex))
         .map((position) => ({
           id: `${position.collIndex}:${account}`.toLowerCase(),
           collateral: { collIndex: position.collIndex },
@@ -312,6 +319,7 @@ export function useStabilityPoolDeposit(
 ) {
   let queryFn = async () => {
     if (account === null || collIndex === null) return null;
+    if (!isCollIndex(collIndex) || !isVisibleCollIndex(collIndex)) return null;
     const { stabilityPoolDeposit } = await graphQuery(StabilityPoolDepositQuery, {
       id: `${collIndex}:${account}`.toLowerCase(),
     });
@@ -333,6 +341,7 @@ export function useStabilityPoolDeposit(
   if (DEMO_MODE) {
     queryFn = async () => {
       if (account === null || collIndex === null) return null;
+      if (!isCollIndex(collIndex) || !isVisibleCollIndex(collIndex)) return null;
       const position = ACCOUNT_POSITIONS.find(
         (position): position is PositionEarn => (
           position.type === "earn" && position.collIndex === collIndex
@@ -383,11 +392,15 @@ export function useStabilityPool(
     const { stabilityPools } = await graphQuery(
       StabilityPoolsQuery,
     );
-    return stabilityPools.map((stabilityPool) => ({
-      collIndex: parseInt(stabilityPool.id, 10),
-      apr: dnum18(0),
-      totalDeposited: dnum18(stabilityPool.totalDeposited),
-    }));
+    return stabilityPools
+      .map((stabilityPool) => ({
+        collIndex: parseInt(stabilityPool.id, 10),
+        apr: dnum18(0),
+        totalDeposited: dnum18(stabilityPool.totalDeposited),
+      }))
+      .filter((pool) => (
+        isCollIndex(pool.collIndex) && isVisibleCollIndex(pool.collIndex)
+      ));
   };
 
   if (DEMO_MODE) {
@@ -396,7 +409,9 @@ export function useStabilityPool(
         collIndex,
         apr: dnum18(0),
         totalDeposited: dnum18(0),
-      }));
+      })).filter((pool) => (
+        isCollIndex(pool.collIndex) && isVisibleCollIndex(pool.collIndex)
+      ));
   }
 
   return useQuery({
@@ -627,6 +642,9 @@ export function useTroveCount(options?: Options) {
     
     for (const trove of result.data.troves) {
       const collIndex = trove.collateral.collIndex;
+      if (!isCollIndex(collIndex) || !isVisibleCollIndex(collIndex)) {
+        continue;
+      }
       countByCollateral[collIndex] = (countByCollateral[collIndex] || 0) + 1;
     }
     
@@ -636,7 +654,10 @@ export function useTroveCount(options?: Options) {
 
   if (DEMO_MODE) {
     queryFn = async () => {
-      return ACCOUNT_POSITIONS.filter(isPositionLoanCommitted).length;
+      return ACCOUNT_POSITIONS
+        .filter(isPositionLoanCommitted)
+        .filter((position) => isVisibleCollIndex(position.collIndex))
+        .length;
     };
   }
 
@@ -651,6 +672,24 @@ const TROVE_EXPLORER_PAGE_SIZE = 1000;
 
 export function useTrovesWithCurrentDebt(options?: Options) {
   let queryFn = async (): Promise<TroveExplorerItem[]> => {
+    type SubgraphTrove = {
+      id: string;
+      borrower: string;
+      createdAt: string;
+      debt: string;
+      deposit: string;
+      interestRate: string;
+      status: string;
+      troveId: string;
+      updatedAt: string;
+      collateral: {
+        collIndex: number;
+        minCollRatio: string;
+        token: { symbol: string; name: string };
+      };
+      interestBatch: { annualInterestRate: string } | null;
+    };
+
     const query = `
       query TrovesWithCurrentDebt($first: Int!, $lastId: ID!) {
         troves(
@@ -676,28 +715,15 @@ export function useTrovesWithCurrentDebt(options?: Options) {
       }
     `;
 
-    type TroveExplorerSubgraphItem = {
-      id: string;
-      borrower: string;
-      createdAt: string;
-      troveId: string;
-      updatedAt: string;
-      collateral: {
-        collIndex: number;
-        minCollRatio: string;
-        token: { symbol: string; name: string };
-      };
-    };
-
-    type ValidTroveExplorerSubgraphItem = TroveExplorerSubgraphItem & {
+    type ValidSubgraphTrove = SubgraphTrove & {
       id: PrefixedTroveId;
       troveId: TroveExplorerItem["troveId"];
-      collateral: TroveExplorerSubgraphItem["collateral"] & {
+      collateral: SubgraphTrove["collateral"] & {
         collIndex: CollIndex;
       };
     };
 
-    const troves: TroveExplorerSubgraphItem[] = [];
+    const troves: SubgraphTrove[] = [];
     let lastId = "";
 
     while (true) {
@@ -720,12 +746,14 @@ export function useTrovesWithCurrentDebt(options?: Options) {
         throw new Error("Error while fetching troves from the subgraph");
       }
 
-      const result = await response.json();
-      if (!result.data) {
+      const result = await response.json() as {
+        data?: { troves?: SubgraphTrove[] };
+      };
+      if (!result.data?.troves) {
         throw new Error("Invalid response from the subgraph");
       }
 
-      const page = result.data.troves as TroveExplorerSubgraphItem[];
+      const page = result.data.troves;
       troves.push(...page);
 
       if (page.length < TROVE_EXPLORER_PAGE_SIZE) {
@@ -735,7 +763,7 @@ export function useTrovesWithCurrentDebt(options?: Options) {
       lastId = page[page.length - 1]?.id ?? lastId;
     }
 
-    const validTroves = troves.filter((trove): trove is ValidTroveExplorerSubgraphItem => {
+    const validTroves = troves.filter((trove): trove is ValidSubgraphTrove => {
       return isPrefixedtroveId(trove.id) && isTroveId(trove.troveId) && isCollIndex(trove.collateral.collIndex);
     });
     // The subgraph is only an index here; current debt and status come from contracts.
@@ -747,12 +775,20 @@ export function useTrovesWithCurrentDebt(options?: Options) {
         return [];
       }
 
+      const collateralSymbol = (
+        getContracts().collaterals[trove.collateral.collIndex]?.symbol
+          ?? trove.collateral.token.symbol
+      ) as CollateralSymbol;
+
+      if (!isVisibleCollateralSymbol(collateralSymbol) || !isVisibleCollIndex(trove.collateral.collIndex)) {
+        return [];
+      }
+
       return [{
         id: trove.id,
         troveId: trove.troveId,
         borrower: trove.borrower as Address,
-        collateralSymbol: getContracts().collaterals[trove.collateral.collIndex]?.symbol
-          ?? trove.collateral.token.symbol as CollateralSymbol,
+        collateralSymbol,
         collateralName: trove.collateral.token.name,
         collIndex: trove.collateral.collIndex,
         borrowed: dnum18(latestTrove.debt),
