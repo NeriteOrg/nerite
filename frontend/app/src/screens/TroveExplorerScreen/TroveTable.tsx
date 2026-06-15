@@ -1,4 +1,5 @@
 import type { TroveExplorerItem } from "@/src/types";
+import type { Dnum } from "dnum";
 
 import { getLiquidationPrice, getLtv } from "@/src/liquity-math";
 import { usePrice } from "@/src/services/Prices";
@@ -15,9 +16,6 @@ type Props = {
   onSort: (field: string) => void;
 };
 
-// Client-side sortable fields (computed from prices)
-const CLIENT_SORT_FIELDS = new Set(["collateralValue", "liqPrice", "ltv"]);
-
 function useAllPrices() {
   // Always call usePrice for every symbol — hook count is constant
   const eth = usePrice("ETH");
@@ -32,14 +30,83 @@ function useAllPrices() {
   return useMemo(() => {
     const map = new Map<string, readonly [bigint, number] | null>();
     const queries = [
-      ["ETH", eth], ["WSTETH", wsteth], ["RETH", reth], ["RSETH", rseth],
-      ["WEETH", weeth], ["ARB", arb], ["COMP", comp], ["TBTC", tbtc],
+      ["ETH", eth],
+      ["WSTETH", wsteth],
+      ["RETH", reth],
+      ["RSETH", rseth],
+      ["WEETH", weeth],
+      ["ARB", arb],
+      ["COMP", comp],
+      ["TBTC", tbtc],
     ] as const;
     for (const [sym, q] of queries) {
       map.set(sym, q.data ?? null);
     }
     return map;
   }, [eth.data, wsteth.data, reth.data, rseth.data, weeth.data, arb.data, comp.data, tbtc.data]);
+}
+
+function compareDnum(a: Dnum | null, b: Dnum | null, orderDirection: "asc" | "desc") {
+  if (a === null && b === null) return 0;
+  if (a === null) return 1;
+  if (b === null) return -1;
+  const comparison = dn.lt(a, b) ? -1 : dn.gt(a, b) ? 1 : 0;
+  return orderDirection === "asc" ? comparison : -comparison;
+}
+
+function compareTroves(
+  a: TroveExplorerItem,
+  b: TroveExplorerItem,
+  orderBy: string,
+  orderDirection: "asc" | "desc",
+  priceMap: Map<string, readonly [bigint, number] | null>,
+) {
+  if (orderBy === "status") {
+    const comparison = a.status.localeCompare(b.status);
+    return orderDirection === "asc" ? comparison : -comparison;
+  }
+
+  if (orderBy === "deposit") {
+    return compareDnum(a.deposit, b.deposit, orderDirection);
+  }
+
+  if (orderBy === "debt") {
+    return compareDnum(a.borrowed, b.borrowed, orderDirection);
+  }
+
+  if (orderBy === "collateralValue") {
+    const priceA = priceMap.get(a.collateralSymbol);
+    const priceB = priceMap.get(b.collateralSymbol);
+    return compareDnum(
+      priceA ? dn.mul(a.deposit, priceA) : null,
+      priceB ? dn.mul(b.deposit, priceB) : null,
+      orderDirection,
+    );
+  }
+
+  if (orderBy === "liqPrice") {
+    return compareDnum(
+      getLiquidationPrice(a.deposit, a.borrowed, Number(a.minCollRatio) / 1e18),
+      getLiquidationPrice(b.deposit, b.borrowed, Number(b.minCollRatio) / 1e18),
+      orderDirection,
+    );
+  }
+
+  if (orderBy === "ltv") {
+    const priceA = priceMap.get(a.collateralSymbol);
+    const priceB = priceMap.get(b.collateralSymbol);
+    return compareDnum(
+      priceA ? getLtv(a.deposit, a.borrowed, priceA) : null,
+      priceB ? getLtv(b.deposit, b.borrowed, priceB) : null,
+      orderDirection,
+    );
+  }
+
+  if (orderBy === "interestRate") {
+    return compareDnum(a.interestRate, b.interestRate, orderDirection);
+  }
+
+  return 0;
 }
 
 export function TroveTable({
@@ -51,38 +118,9 @@ export function TroveTable({
 }: Props) {
   const priceMap = useAllPrices();
 
-  // Client-side sort for computed fields
   const sortedTroves = useMemo(() => {
-    if (!CLIENT_SORT_FIELDS.has(orderBy)) return troves;
-
     return [...troves].sort((a, b) => {
-      const priceA = priceMap.get(a.collateralSymbol);
-      const priceB = priceMap.get(b.collateralSymbol);
-
-      let valA: number | null = null;
-      let valB: number | null = null;
-
-      if (orderBy === "collateralValue") {
-        valA = priceA ? Number(dn.format(dn.mul(a.deposit, priceA))) : null;
-        valB = priceB ? Number(dn.format(dn.mul(b.deposit, priceB))) : null;
-      } else if (orderBy === "liqPrice") {
-        const liqA = getLiquidationPrice(a.deposit, a.borrowed, Number(a.minCollRatio) / 1e18);
-        const liqB = getLiquidationPrice(b.deposit, b.borrowed, Number(b.minCollRatio) / 1e18);
-        valA = liqA ? Number(dn.format(liqA)) : null;
-        valB = liqB ? Number(dn.format(liqB)) : null;
-      } else if (orderBy === "ltv") {
-        const ltvA = priceA ? getLtv(a.deposit, a.borrowed, priceA) : null;
-        const ltvB = priceB ? getLtv(b.deposit, b.borrowed, priceB) : null;
-        valA = ltvA ? Number(dn.format(ltvA)) : null;
-        valB = ltvB ? Number(dn.format(ltvB)) : null;
-      }
-
-      // Nulls sort to end
-      if (valA === null && valB === null) return 0;
-      if (valA === null) return 1;
-      if (valB === null) return -1;
-
-      return orderDirection === "asc" ? valA - valB : valB - valA;
+      return compareTroves(a, b, orderBy, orderDirection, priceMap);
     });
   }, [troves, orderBy, orderDirection, priceMap]);
 
@@ -181,9 +219,7 @@ export function TroveTable({
         </tr>
       </thead>
       <tbody>
-        {sortedTroves.map((trove) => (
-          <TroveRow key={trove.id} trove={trove} />
-        ))}
+        {sortedTroves.map((trove) => <TroveRow key={trove.id} trove={trove} />)}
       </tbody>
     </table>
   );
