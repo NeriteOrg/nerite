@@ -1,6 +1,6 @@
 import { Address, createPublicClient, hexToBigInt, http, toHex } from "viem";
 import { getContracts } from "./contracts";
-import { CollIndex, CombinedTroveData, DebtPerInterestRate, PrefixedTroveId, ReturnCombinedTroveReadCallData, ReturnTroveReadCallData, Trove, TroveStatus } from "./types";
+import { CollIndex, CombinedTroveData, DebtPerInterestRate, PrefixedTroveId, ReturnCombinedTroveReadCallData, ReturnTroveReadCallData, Trove, TroveId, TroveStatus } from "./types";
 import { CHAIN_RPC_URL } from "./env";
 import { CHAIN } from "./services/Arbitrum";
 import { getCollToken, getPrefixedTroveId, parsePrefixedTroveId } from "./liquity-utils";
@@ -112,6 +112,73 @@ export async function getTroveById(id: PrefixedTroveId): Promise<ReturnTroveRead
       batchManager: trove.interestBatchManager,
     },
   }
+}
+
+type LatestTroveData = {
+  entireDebt: bigint;
+  entireColl: bigint;
+  annualInterestRate: bigint;
+};
+
+type LatestTroveById = {
+  id: PrefixedTroveId;
+  troveId: TroveId;
+  debt: bigint;
+  deposit: bigint;
+  interestRate: bigint;
+  status: TroveStatus;
+};
+
+const LATEST_TROVE_READ_BATCH_SIZE = 250;
+
+export async function getLatestTrovesByIds(ids: PrefixedTroveId[]): Promise<Map<PrefixedTroveId, LatestTroveById>> {
+  const { collaterals } = getContracts()
+  const client = getPublicClient()
+  const latestTroves = new Map<PrefixedTroveId, LatestTroveById>();
+
+  for (let i = 0; i < ids.length; i += LATEST_TROVE_READ_BATCH_SIZE) {
+    const batch = ids.slice(i, i + LATEST_TROVE_READ_BATCH_SIZE);
+    const calls = batch.flatMap((id) => {
+      const { collIndex, troveId } = parsePrefixedTroveId(id)
+      const tokenId = hexToBigInt(troveId)
+      const TroveManager = collaterals[collIndex]!.contracts.TroveManager;
+      return [
+        {
+          ...TroveManager,
+          functionName: "getLatestTroveData",
+          args: [tokenId],
+        },
+        {
+          ...TroveManager,
+          functionName: "getTroveStatus",
+          args: [tokenId],
+        },
+      ] as const;
+    });
+
+    const output = await client.multicall({ contracts: calls });
+
+    batch.forEach((id, index) => {
+      const latestResult = output[index * 2];
+      const statusResult = output[index * 2 + 1];
+      if (latestResult?.status !== "success" || statusResult?.status !== "success") {
+        return;
+      }
+
+      const latest = latestResult.result as LatestTroveData;
+      const { troveId } = parsePrefixedTroveId(id);
+      latestTroves.set(id, {
+        id,
+        troveId,
+        debt: latest.entireDebt,
+        deposit: latest.entireColl,
+        interestRate: latest.annualInterestRate,
+        status: Number(statusResult.result) as TroveStatus,
+      });
+    });
+  }
+
+  return latestTroves;
 }
 
 export async function getTrovesByAccount(account: Address): Promise<ReturnCombinedTroveReadCallData[]> {

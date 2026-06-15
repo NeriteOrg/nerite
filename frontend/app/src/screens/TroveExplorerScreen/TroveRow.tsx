@@ -35,6 +35,7 @@ export function TroveRow({ trove }: Props) {
     closedByOwner: "Closed",
     liquidated: "Liquidated",
     redeemed: "Redeemed",
+    zombie: "Zombie",
   };
 
   const statusColor: Record<string, string> = {
@@ -43,6 +44,7 @@ export function TroveRow({ trove }: Props) {
     closedByOwner: "#6b7280",
     liquidated: "#dc2626",
     redeemed: "#d97706",
+    zombie: "#9333ea",
   };
 
   return (

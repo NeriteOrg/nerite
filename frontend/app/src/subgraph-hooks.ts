@@ -44,7 +44,7 @@ import {
   TrovesByAccountsQuery,
 } from "./subgraph-queries";
 import { getContracts } from "./contracts";
-import { getAllDebtPerInterestRate, getAllTroves, getTroveById, getTrovesByAccount } from "./liquity-read-calls";
+import { getAllDebtPerInterestRate, getLatestTrovesByIds, getTroveById, getTrovesByAccount } from "./liquity-read-calls";
 import { useSubgraphStatus } from "./services/SubgraphStatus";
 
 type Options = {
@@ -668,13 +668,9 @@ export function useTroveCount(options?: Options) {
   });
 }
 
-export function useAllActiveTroves(
-  pageSize: number,
-  skip: number,
-  orderBy: string,
-  orderDirection: "asc" | "desc",
-  options?: Options,
-) {
+const TROVE_EXPLORER_PAGE_SIZE = 1000;
+
+export function useTrovesWithCurrentDebt(options?: Options) {
   let queryFn = async (): Promise<TroveExplorerItem[]> => {
     type SubgraphTrove = {
       id: string;
@@ -695,21 +691,16 @@ export function useAllActiveTroves(
     };
 
     const query = `
-      query AllActiveTroves($first: Int!, $skip: Int!) {
+      query TrovesWithCurrentDebt($first: Int!, $lastId: ID!) {
         troves(
-          where: { status_in: [active, redeemed] }
+          where: { id_gt: $lastId }
           first: $first
-          skip: $skip
-          orderBy: updatedAt
-          orderDirection: desc
+          orderBy: id
+          orderDirection: asc
         ) {
           id
           borrower
           createdAt
-          debt
-          deposit
-          interestRate
-          status
           troveId
           updatedAt
           collateral {
@@ -720,17 +711,22 @@ export function useAllActiveTroves(
               name
             }
           }
-          interestBatch {
-            annualInterestRate
-          }
         }
       }
     `;
 
-    const subgraphTroves: SubgraphTrove[] = [];
-    const subgraphPageSize = 1000;
+    type ValidSubgraphTrove = SubgraphTrove & {
+      id: PrefixedTroveId;
+      troveId: TroveExplorerItem["troveId"];
+      collateral: SubgraphTrove["collateral"] & {
+        collIndex: CollIndex;
+      };
+    };
 
-    for (let subgraphSkip = 0;; subgraphSkip += subgraphPageSize) {
+    const troves: SubgraphTrove[] = [];
+    let lastId = "";
+
+    while (true) {
       const response = await fetch(SUBGRAPH_URL, {
         method: "POST",
         headers: {
@@ -740,14 +736,14 @@ export function useAllActiveTroves(
         body: JSON.stringify({
           query,
           variables: {
-            first: subgraphPageSize,
-            skip: subgraphSkip,
+            first: TROVE_EXPLORER_PAGE_SIZE,
+            lastId,
           },
         }),
       });
 
       if (!response.ok) {
-        throw new Error("Error while fetching active troves from the subgraph");
+        throw new Error("Error while fetching troves from the subgraph");
       }
 
       const result = await response.json() as {
@@ -757,56 +753,34 @@ export function useAllActiveTroves(
         throw new Error("Invalid response from the subgraph");
       }
 
-      subgraphTroves.push(...result.data.troves);
+      const page = result.data.troves;
+      troves.push(...page);
 
-      if (result.data.troves.length < subgraphPageSize) {
+      if (page.length < TROVE_EXPLORER_PAGE_SIZE) {
         break;
       }
+
+      lastId = page[page.length - 1]?.id ?? lastId;
     }
 
-    const liveTrovesById = new Map<
-      string,
-      { annualInterestRate: bigint; entireColl: bigint; entireDebt: bigint }
-    >();
+    const validTroves = troves.filter((trove): trove is ValidSubgraphTrove => {
+      return isPrefixedtroveId(trove.id) && isTroveId(trove.troveId) && isCollIndex(trove.collateral.collIndex);
+    });
+    // The subgraph is only an index here; current debt and status come from contracts.
+    const latestTroves = await getLatestTrovesByIds(validTroves.map((trove) => trove.id));
 
-    for (const [collIndex_, troves] of Object.entries(await getAllTroves())) {
-      const collIndex = Number(collIndex_);
-      if (!isCollIndex(collIndex)) {
-        continue;
-      }
-      for (const trove of troves) {
-        liveTrovesById.set(`${collIndex}:${trove.id.toString()}`, trove);
-      }
-    }
-
-    const troves = subgraphTroves.flatMap((trove): TroveExplorerItem[] => {
-      if (!isTroveId(trove.troveId)) {
-        throw new Error(`Invalid trove ID: ${trove.id} / ${trove.troveId}`);
-      }
-
-      const collIndex = trove.collateral.collIndex;
-      if (!isCollIndex(collIndex)) {
-        throw new Error(`Invalid collateral index: ${collIndex}`);
-      }
-
-      const liveTrove = liveTrovesById.get(
-        `${collIndex}:${BigInt(trove.troveId).toString()}`,
-      );
-
-      if (!liveTrove) {
-        return [];
-      }
-
-      if (trove.status === "redeemed" && liveTrove.entireDebt === 0n) {
+    return validTroves.flatMap((trove): TroveExplorerItem[] => {
+      const latestTrove = latestTroves.get(trove.id);
+      if (!latestTrove || latestTrove.debt === 0n) {
         return [];
       }
 
       const collateralSymbol = (
-        getContracts().collaterals[collIndex]?.symbol
+        getContracts().collaterals[trove.collateral.collIndex]?.symbol
           ?? trove.collateral.token.symbol
       ) as CollateralSymbol;
 
-      if (!isVisibleCollateralSymbol(collateralSymbol) || !isVisibleCollIndex(collIndex)) {
+      if (!isVisibleCollateralSymbol(collateralSymbol) || !isVisibleCollIndex(trove.collateral.collIndex)) {
         return [];
       }
 
@@ -816,42 +790,18 @@ export function useAllActiveTroves(
         borrower: trove.borrower as Address,
         collateralSymbol,
         collateralName: trove.collateral.token.name,
-        collIndex,
-        borrowed: dnum18(liveTrove.entireDebt),
-        deposit: dnum18(liveTrove.entireColl),
+        collIndex: trove.collateral.collIndex,
+        borrowed: dnum18(latestTrove.debt),
+        deposit: dnum18(latestTrove.deposit),
         minCollRatio: BigInt(trove.collateral.minCollRatio),
-        interestRate: dnum18(liveTrove.annualInterestRate),
-        status: trove.status,
+        interestRate: dnum18(latestTrove.interestRate),
+        status: latestTrove.status === TroveStatus.zombie
+          ? "zombie"
+          : enumToLoanStatus(latestTrove.status),
         updatedAt: Number(trove.updatedAt) * 1000,
         createdAt: Number(trove.createdAt) * 1000,
       }];
     });
-
-    const getSortValue = (trove: TroveExplorerItem): bigint | null => {
-      if (orderBy === "deposit") return trove.deposit[0];
-      if (orderBy === "interestRate") return trove.interestRate[0];
-      if (orderBy === "debt") return trove.borrowed[0];
-      return null;
-    };
-
-    const sortable = orderBy === "debt"
-      || orderBy === "deposit"
-      || orderBy === "interestRate";
-    const sortedTroves = sortable
-      ? [...troves].sort((a, b) => {
-        const valueA = getSortValue(a);
-        const valueB = getSortValue(b);
-
-        if (valueA === null || valueB === null || valueA === valueB) {
-          return 0;
-        }
-
-        const comparison = valueA < valueB ? -1 : 1;
-        return orderDirection === "asc" ? comparison : -comparison;
-      })
-      : troves;
-
-    return sortedTroves.slice(skip, skip + pageSize);
   };
 
   if (DEMO_MODE) {
@@ -859,7 +809,7 @@ export function useAllActiveTroves(
   }
 
   return useQuery({
-    queryKey: ["AllActiveTroves", pageSize, skip, orderBy, orderDirection],
+    queryKey: ["TrovesWithCurrentDebt"],
     queryFn,
     ...prepareOptions(options),
   });
